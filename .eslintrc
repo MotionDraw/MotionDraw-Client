@@ -1,0 +1,16 @@
+{
+  "parserOptions": {
+    "ecmaVersion": "latest"
+  },
+  "env": {
+    "es2020": true
+  },
+  "extends": ["react-app", "eslint:recommended"],
+  "rules": {
+    "no-var": "error",
+    "no-multiple-empty-lines": "error",
+    "no-console": ["warn", { "allow": ["warn", "error", "info"] }],
+    "eqeqeq": "error",
+    "no-unused-vars": "warn"
+  }
+}
