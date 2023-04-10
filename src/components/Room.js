@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from "react";
-import styled from "styled-components";
 import { drawLandmarks, drawConnectors } from "@mediapipe/drawing_utils";
 import { FilesetResolver, GestureRecognizer } from "@mediapipe/tasks-vision";
 import { HAND_CONNECTIONS } from "@mediapipe/hands";
+import { drawLine } from "../utils/drawLine";
+import styled from "styled-components";
 
 export default function Room() {
   const videoRef = useRef(null);
@@ -16,7 +17,7 @@ export default function Room() {
         video: true,
       })
       .then((stream) => {
-        let video = videoRef.current;
+        const video = videoRef.current;
 
         video.srcObject = stream;
 
@@ -53,12 +54,13 @@ export default function Room() {
 
   useEffect(() => {
     const videoCtx = videoCanvasRef.current.getContext("2d");
+    const paperCtx = paperCanvasRef.current.getContext("2d");
 
     function renderLoop() {
       if (!gestureRecognizer) return;
 
       if (videoRef.current && videoRef.current.readyState === 4) {
-        let nowInMs = Date.now();
+        const nowInMs = Date.now();
         const gestureRecognitionResult = gestureRecognizer.recognizeForVideo(
           videoRef.current,
           nowInMs
@@ -86,7 +88,16 @@ export default function Room() {
               lineWidth: 1,
             });
           }
+          drawLine(
+            gestureRecognitionResult,
+            paperCtx,
+            gestureRecognitionResult.landmarks[0][8].x *
+              paperCanvasRef.current.width,
+            gestureRecognitionResult.landmarks[0][8].y *
+              paperCanvasRef.current.height
+          );
         }
+
         videoCtx.restore();
       }
       requestAnimationFrame(renderLoop);
@@ -160,6 +171,7 @@ const Video = styled.video`
   z-index: 9;
   width: 320px;
   height: 240px;
+  transform: rotateY(180deg);
 `;
 
 const VideoCanvas = styled.canvas`
@@ -169,6 +181,7 @@ const VideoCanvas = styled.canvas`
   z-index: 9;
   width: 320px;
   height: 240px;
+  transform: rotateY(180deg);
 `;
 
 const Paper = styled.div`
@@ -186,6 +199,7 @@ const PaperCanvas = styled.canvas`
   z-index: 9;
   width: 960px;
   height: 540px;
+  transform: rotateY(180deg);
 `;
 const ToolBox = styled.div`
   display: flex;
