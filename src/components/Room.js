@@ -4,31 +4,33 @@ import { FilesetResolver, GestureRecognizer } from "@mediapipe/tasks-vision";
 import { HAND_CONNECTIONS } from "@mediapipe/hands";
 import { drawLine } from "../utils/drawLine";
 import styled from "styled-components";
+import { drawCursor } from "../utils/drawCursor";
+import { prevColor } from "../utils/toolHand";
 
 export default function Room() {
   const videoRef = useRef(null);
   const videoCanvasRef = useRef(null);
   const paperCanvasRef = useRef(null);
+  const cursorCanvasRef = useRef(null);
   const [gestureRecognizer, setGestureRecognizer] = useState();
 
-  const getUserCamera = () => {
-    navigator.mediaDevices
-      .getUserMedia({
-        video: true,
-      })
-      .then((stream) => {
+  useEffect(() => {
+    async function getUserCamera() {
+      let stream = null;
+
+      try {
         const video = videoRef.current;
+
+        stream = await navigator.mediaDevices.getUserMedia({ video: true });
 
         video.srcObject = stream;
 
         video.play();
-      })
-      .catch((error) => {
+      } catch (error) {
         console.log(error);
-      });
-  };
+      }
+    }
 
-  useEffect(() => {
     getUserCamera();
   }, [videoRef]);
 
@@ -55,6 +57,7 @@ export default function Room() {
   useEffect(() => {
     const videoCtx = videoCanvasRef.current.getContext("2d");
     const paperCtx = paperCanvasRef.current.getContext("2d");
+    const cursorCtx = cursorCanvasRef.current.getContext("2d");
 
     function renderLoop() {
       if (!gestureRecognizer) return;
@@ -96,6 +99,14 @@ export default function Room() {
             gestureRecognitionResult.landmarks[0][8].y *
               paperCanvasRef.current.height
           );
+          drawCursor(
+            gestureRecognitionResult,
+            cursorCtx,
+            gestureRecognitionResult.landmarks[0][8].x *
+              paperCanvasRef.current.width,
+            gestureRecognitionResult.landmarks[0][8].y *
+              paperCanvasRef.current.height
+          );
         }
 
         videoCtx.restore();
@@ -103,7 +114,11 @@ export default function Room() {
       requestAnimationFrame(renderLoop);
     }
 
-    requestAnimationFrame(renderLoop);
+    const id = requestAnimationFrame(renderLoop);
+
+    return () => {
+      cancelAnimationFrame(id);
+    };
   }, [gestureRecognizer]);
 
   return (
@@ -126,6 +141,7 @@ export default function Room() {
       <RightContainer>
         <Paper></Paper>
         <PaperCanvas ref={paperCanvasRef} />
+        <PaperCanvas ref={cursorCanvasRef} />
       </RightContainer>
     </Wrapper>
   );
