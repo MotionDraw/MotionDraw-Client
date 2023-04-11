@@ -5,7 +5,7 @@ import { HAND_CONNECTIONS } from "@mediapipe/hands";
 import { drawLine } from "../utils/drawLine";
 import styled from "styled-components";
 import { drawCursor } from "../utils/drawCursor";
-import { prevColor } from "../utils/toolHand";
+import { nextColor, prevColor } from "../utils/toolHand";
 
 export default function Room() {
   const videoRef = useRef(null);
@@ -13,6 +13,8 @@ export default function Room() {
   const paperCanvasRef = useRef(null);
   const cursorCanvasRef = useRef(null);
   const [gestureRecognizer, setGestureRecognizer] = useState();
+  const [color, setColor] = useState("black");
+  const [mode, setMode] = useState("");
 
   useEffect(() => {
     async function getUserCamera() {
@@ -81,6 +83,44 @@ export default function Room() {
         videoCanvasRef.current.height = videoHeight;
 
         if (gestureRecognitionResult.landmarks.length > 0) {
+          if (gestureRecognitionResult.handednesses.length > 0) {
+            if (
+              gestureRecognitionResult.handednesses[0][0].categoryName ===
+                "Right" &&
+              gestureRecognitionResult.gestures[0][0].categoryName ===
+                "Thumb_Up"
+            ) {
+              prevColor(setColor);
+            } else if (
+              gestureRecognitionResult.handednesses[0][0].categoryName ===
+                "Right" &&
+              gestureRecognitionResult.gestures[0][0].categoryName ===
+                "Thumb_Down"
+            ) {
+              nextColor(setColor);
+            }
+
+            if (
+              gestureRecognitionResult.handednesses[0][0].categoryName ===
+                "Left" &&
+              gestureRecognitionResult.gestures[0][0].categoryName ===
+                "Open_Palm"
+            ) {
+              setMode("Move");
+            } else if (
+              gestureRecognitionResult.handednesses[0][0].categoryName ===
+                "Left" &&
+              gestureRecognitionResult.gestures[0][0].categoryName === "Victory"
+            ) {
+              setMode("Erase");
+            } else if (
+              gestureRecognitionResult.handednesses[0][0].categoryName ===
+              "Left"
+            ) {
+              setMode("Draw");
+            }
+          }
+
           for (const landmarks of gestureRecognitionResult.landmarks) {
             drawConnectors(videoCtx, landmarks, HAND_CONNECTIONS, {
               color: "#00FF00",
@@ -91,13 +131,16 @@ export default function Room() {
               lineWidth: 1,
             });
           }
+
           drawLine(
             gestureRecognitionResult,
             paperCtx,
             gestureRecognitionResult.landmarks[0][8].x *
               paperCanvasRef.current.width,
             gestureRecognitionResult.landmarks[0][8].y *
-              paperCanvasRef.current.height
+              paperCanvasRef.current.height,
+            color,
+            mode
           );
           drawCursor(
             gestureRecognitionResult,
@@ -105,21 +148,22 @@ export default function Room() {
             gestureRecognitionResult.landmarks[0][8].x *
               paperCanvasRef.current.width,
             gestureRecognitionResult.landmarks[0][8].y *
-              paperCanvasRef.current.height
+              paperCanvasRef.current.height,
+            color
           );
         }
-
         videoCtx.restore();
       }
-      requestAnimationFrame(renderLoop);
     }
 
-    const id = requestAnimationFrame(renderLoop);
+    const id = setInterval(() => {
+      renderLoop();
+    }, 1);
 
     return () => {
-      cancelAnimationFrame(id);
+      clearInterval(id);
     };
-  }, [gestureRecognizer]);
+  }, [gestureRecognizer, color, mode]);
 
   return (
     <Wrapper>
@@ -132,7 +176,7 @@ export default function Room() {
           <Circle diameter="10" color="green" />
           <Circle diameter="10" color="black" />
         </ToolBox>
-        <div>Draw</div>
+        <div>{mode}</div>
         <div position="relative">
           <Video ref={videoRef} autoPlay />
           <VideoCanvas ref={videoCanvasRef} />
