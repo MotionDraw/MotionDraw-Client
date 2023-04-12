@@ -1,6 +1,12 @@
 import styled from "styled-components";
+import { useNavigate } from "react-router-dom";
 
 export default function Lobby() {
+  const navigate = useNavigate();
+
+  function onClickHandler() {
+    navigate("/rooms");
+  }
   return (
     <Wrapper>
       <Circle top="-30vh" left="-30vh" diameter="70" color="blue" />
@@ -13,7 +19,7 @@ export default function Lobby() {
           <Room>방이름 3</Room>
         </RoomsLists>
       </RoomsContainer>
-      <CreateRoomButton>방 만들기</CreateRoomButton>
+      <CreateRoomButton onClick={onClickHandler}>방 만들기</CreateRoomButton>
     </Wrapper>
   );
 }

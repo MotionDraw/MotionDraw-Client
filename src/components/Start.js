@@ -1,12 +1,19 @@
 import styled from "styled-components";
+import { useNavigate } from "react-router-dom";
 
 export default function Start() {
+  const navigate = useNavigate();
+
+  function onClickHandler() {
+    navigate("/lobby");
+  }
+
   return (
     <Wrapper>
       <Circle top="-30vh" left="-30vh" diameter="70" color="blue" />
       <Circle top="-30vh" left="75vw" diameter="80" color="red" />
       <Circle top="40vh" left="70vw" diameter="90" color="yellow" />
-      <StartButton>Start</StartButton>
+      <StartButton onClick={onClickHandler}>Start</StartButton>
     </Wrapper>
   );
 }
