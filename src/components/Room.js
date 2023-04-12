@@ -4,6 +4,7 @@ import { FilesetResolver, GestureRecognizer } from "@mediapipe/tasks-vision";
 import { HAND_CONNECTIONS } from "@mediapipe/hands";
 import { drawLine } from "../utils/drawLine";
 import styled from "styled-components";
+import modelAssetPath from "../assets/gesture_recognizer.task";
 import { drawCursor } from "../utils/drawCursor";
 import { nextColor, prevColor } from "../utils/toolHand";
 
@@ -14,7 +15,7 @@ export default function Room() {
   const cursorCanvasRef = useRef(null);
   const [gestureRecognizer, setGestureRecognizer] = useState();
   const [color, setColor] = useState("black");
-  const [mode, setMode] = useState("");
+  const [mode, setMode] = useState("Move");
 
   useEffect(() => {
     async function getUserCamera() {
@@ -38,32 +39,34 @@ export default function Room() {
 
   useEffect(() => {
     async function run() {
-      const vision = await FilesetResolver.forVisionTasks(
-        "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/wasm"
-      );
-      const result = await GestureRecognizer.createFromOptions(vision, {
-        baseOptions: {
-          modelAssetPath:
-            "https://storage.googleapis.com/mediapipe-tasks/gesture_recognizer/gesture_recognizer.task",
-        },
-        runningMode: "VIDEO",
-        numHands: 2,
-      });
+      try {
+        const vision = await FilesetResolver.forVisionTasks(
+          "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.1.0-alpha-9/wasm"
+        );
+        const result = await GestureRecognizer.createFromOptions(vision, {
+          baseOptions: {
+            modelAssetPath: modelAssetPath,
+          },
+          runningMode: "VIDEO",
+          numHands: 2,
+        });
 
-      setGestureRecognizer(result);
+        setGestureRecognizer(result);
+      } catch (error) {
+        console.log(error);
+      }
     }
 
     run();
   }, []);
 
   useEffect(() => {
+    if (!gestureRecognizer) return;
     const videoCtx = videoCanvasRef.current.getContext("2d");
     const paperCtx = paperCanvasRef.current.getContext("2d");
     const cursorCtx = cursorCanvasRef.current.getContext("2d");
 
     function renderLoop() {
-      if (!gestureRecognizer) return;
-
       if (videoRef.current && videoRef.current.readyState === 4) {
         const nowInMs = Date.now();
         const gestureRecognitionResult = gestureRecognizer.recognizeForVideo(
@@ -83,44 +86,6 @@ export default function Room() {
         videoCanvasRef.current.height = videoHeight;
 
         if (gestureRecognitionResult.landmarks.length > 0) {
-          if (gestureRecognitionResult.handednesses.length > 0) {
-            if (
-              gestureRecognitionResult.handednesses[0][0].categoryName ===
-                "Right" &&
-              gestureRecognitionResult.gestures[0][0].categoryName ===
-                "Thumb_Up"
-            ) {
-              prevColor(setColor);
-            } else if (
-              gestureRecognitionResult.handednesses[0][0].categoryName ===
-                "Right" &&
-              gestureRecognitionResult.gestures[0][0].categoryName ===
-                "Thumb_Down"
-            ) {
-              nextColor(setColor);
-            }
-
-            if (
-              gestureRecognitionResult.handednesses[0][0].categoryName ===
-                "Left" &&
-              gestureRecognitionResult.gestures[0][0].categoryName ===
-                "Open_Palm"
-            ) {
-              setMode("Move");
-            } else if (
-              gestureRecognitionResult.handednesses[0][0].categoryName ===
-                "Left" &&
-              gestureRecognitionResult.gestures[0][0].categoryName === "Victory"
-            ) {
-              setMode("Erase");
-            } else if (
-              gestureRecognitionResult.handednesses[0][0].categoryName ===
-              "Left"
-            ) {
-              setMode("Draw");
-            }
-          }
-
           for (const landmarks of gestureRecognitionResult.landmarks) {
             drawConnectors(videoCtx, landmarks, HAND_CONNECTIONS, {
               color: "#00FF00",
@@ -130,6 +95,34 @@ export default function Room() {
               color: "#FF0000",
               lineWidth: 1,
             });
+          }
+
+          drawCursor(
+            gestureRecognitionResult,
+            cursorCtx,
+            gestureRecognitionResult.landmarks[0][8].x *
+              paperCanvasRef.current.width,
+            gestureRecognitionResult.landmarks[0][8].y *
+              paperCanvasRef.current.height,
+            color,
+            mode
+          );
+        }
+
+        if (
+          gestureRecognitionResult.handednesses.length === 1 &&
+          gestureRecognitionResult.handednesses[0][0].categoryName === "Left"
+        ) {
+          if (
+            gestureRecognitionResult.gestures[0][0].categoryName === "Open_Palm"
+          ) {
+            setMode("Move");
+          } else if (
+            gestureRecognitionResult.gestures[0][0].categoryName === "Victory"
+          ) {
+            setMode("Erase");
+          } else {
+            setMode("Draw");
           }
 
           drawLine(
@@ -142,14 +135,93 @@ export default function Room() {
             color,
             mode
           );
-          drawCursor(
+        } else if (
+          gestureRecognitionResult.handednesses.length === 1 &&
+          gestureRecognitionResult.handednesses[0][0].categoryName === "Right"
+        ) {
+          if (
+            gestureRecognitionResult.gestures[0][0].categoryName === "Thumb_Up"
+          ) {
+            prevColor(setColor);
+          } else if (
+            gestureRecognitionResult.gestures[0][0].categoryName ===
+            "Thumb_Down"
+          ) {
+            nextColor(setColor);
+          }
+        } else if (
+          gestureRecognitionResult.handednesses.length === 2 &&
+          gestureRecognitionResult.handednesses[0][0].categoryName === "Left"
+        ) {
+          if (
+            gestureRecognitionResult.gestures[0][0].categoryName === "Open_Palm"
+          ) {
+            setMode("Move");
+          } else if (
+            gestureRecognitionResult.gestures[0][0].categoryName === "Victory"
+          ) {
+            setMode("Erase");
+          } else {
+            setMode("Draw");
+          }
+
+          if (
+            gestureRecognitionResult.gestures[1][0].categoryName === "Thumb_Up"
+          ) {
+            nextColor(setColor);
+          } else if (
+            gestureRecognitionResult.gestures[1][0].categoryName ===
+            "Thumb_Down"
+          ) {
+            prevColor(setColor);
+          }
+
+          drawLine(
             gestureRecognitionResult,
-            cursorCtx,
+            paperCtx,
             gestureRecognitionResult.landmarks[0][8].x *
               paperCanvasRef.current.width,
             gestureRecognitionResult.landmarks[0][8].y *
               paperCanvasRef.current.height,
-            color
+            color,
+            mode
+          );
+        } else if (
+          gestureRecognitionResult.handednesses.length === 2 &&
+          gestureRecognitionResult.handednesses[0][0].categoryName === "Right"
+        ) {
+          if (
+            gestureRecognitionResult.gestures[1][0].categoryName === "Open_Palm"
+          ) {
+            setMode("Move");
+          } else if (
+            gestureRecognitionResult.gestures[1][0].categoryName === "Victory"
+          ) {
+            setMode("Erase");
+          } else {
+            setMode("Draw");
+          }
+
+          if (
+            gestureRecognitionResult.gestures[0][0].categoryName === "Thumb_Up"
+          ) {
+            prevColor(setColor);
+          } else if (
+            gestureRecognitionResult.gestures[0][0].categoryName ===
+            "Thumb_Down"
+          ) {
+            nextColor(setColor);
+          }
+
+          drawLine(
+            gestureRecognitionResult,
+            paperCtx,
+            gestureRecognitionResult.landmarks[1][8].x *
+              paperCanvasRef.current.width,
+            gestureRecognitionResult.landmarks[1][8].y *
+              paperCanvasRef.current.height,
+            color,
+            mode
           );
         }
         videoCtx.restore();
@@ -158,7 +230,7 @@ export default function Room() {
 
     const id = setInterval(() => {
       renderLoop();
-    }, 1);
+    }, 40);
 
     return () => {
       clearInterval(id);
