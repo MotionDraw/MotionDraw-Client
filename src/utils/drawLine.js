@@ -1,6 +1,7 @@
 let prevMode = "";
 
-export function drawLine(result, ctx, x, y, color, mode) {
+export function drawLine(result, ctx, x, y, color, lineWidth, mode) {
+  const eraserSize = lineWidth * 5;
   if (result.handednesses.length > 0) {
     if (mode === "Move") {
       prevMode = "Move";
@@ -8,7 +9,12 @@ export function drawLine(result, ctx, x, y, color, mode) {
       ctx.moveTo(x, y);
     } else if (mode === "Erase") {
       prevMode = "Erase";
-      ctx.clearRect(x - 5, y - 5, 10, 10);
+      ctx.clearRect(
+        x - eraserSize / 2,
+        y - eraserSize / 2,
+        eraserSize,
+        eraserSize
+      );
     } else if (mode === "Draw") {
       if (prevMode === "Erase") {
         ctx.beginPath();
@@ -17,8 +23,9 @@ export function drawLine(result, ctx, x, y, color, mode) {
         return;
       }
       prevMode = "Draw";
+      ctx.lineWidth = lineWidth;
       ctx.strokeStyle = color;
-      ctx.lineTo(x + 1, y + 1);
+      ctx.lineTo(x, y);
       ctx.stroke();
     }
   }
