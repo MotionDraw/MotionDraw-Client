@@ -3,7 +3,7 @@ let gesture = "";
 const color = ["red", "orange", "yellow", "blue", "green", "black"];
 let index = 0;
 
-export function prevColor(setColor) {
+export function changePrevColor(setColor) {
   if (gesture === "Thumb_Down") {
     count++;
   } else {
@@ -21,7 +21,7 @@ export function prevColor(setColor) {
   }
 }
 
-export function nextColor(setColor) {
+export function changeNextColor(setColor) {
   if (gesture === "Thumb_Up") {
     count++;
   } else {
@@ -37,4 +37,36 @@ export function nextColor(setColor) {
       index = 0;
     }
   }
+}
+
+export function decreasesLineWidth() {
+  if (gesture === "Closed_Fist") {
+    count++;
+  } else {
+    gesture = "Closed_Fist";
+    count = 0;
+  }
+
+  if (count > 10) {
+    count = 0;
+    return true;
+  }
+
+  return false;
+}
+
+export function increasesLineWidth() {
+  if (gesture === "Open_Palm") {
+    count++;
+  } else {
+    gesture = "Open_Palm";
+    count = 0;
+  }
+
+  if (count > 10) {
+    count = 0;
+    return true;
+  }
+
+  return false;
 }
