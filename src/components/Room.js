@@ -6,6 +6,7 @@ import { drawLine } from "../utils/drawLine";
 import styled from "styled-components";
 import modelAssetPath from "../assets/gesture_recognizer.task";
 import { drawCursor } from "../utils/drawCursor";
+import { useParams } from "react-router-dom";
 import {
   changeNextColor,
   changePrevColor,
@@ -17,12 +18,15 @@ import {
   MIN_THICKNESS,
   THICKNESS,
 } from "../constants/canvasConfig";
+import { socket } from "./App";
 
 export default function Room() {
   const videoRef = useRef(null);
   const videoCanvasRef = useRef(null);
   const paperCanvasRef = useRef(null);
   const cursorCanvasRef = useRef(null);
+  const cleanupCalled = useRef(false);
+  const { roomName } = useParams();
   const [gestureRecognizer, setGestureRecognizer] = useState();
   const [color, setColor] = useState("black");
   const [mode, setMode] = useState("Move");
@@ -47,6 +51,16 @@ export default function Room() {
 
     getUserCamera();
   }, [videoRef]);
+
+  useEffect(() => {
+    return () => {
+      if (!cleanupCalled.current) {
+        cleanupCalled.current = true;
+      } else {
+        socket.emit("leave-room", roomName);
+      }
+    };
+  }, [roomName]);
 
   useEffect(() => {
     async function run() {
@@ -278,6 +292,7 @@ export default function Room() {
             mode
           );
         }
+
         videoCtx.restore();
       }
     }

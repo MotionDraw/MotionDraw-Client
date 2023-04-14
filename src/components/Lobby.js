@@ -1,12 +1,45 @@
 import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { socket } from "./App";
 
 export default function Lobby() {
+  const [rooms, setRooms] = useState([]);
   const navigate = useNavigate();
 
-  function onClickHandler() {
-    navigate("/rooms");
+  function onClickRoom(roomName) {
+    socket.emit("join-room", roomName, (response) => {
+      if (response.success) {
+        navigate(`/rooms/${response.payload}`);
+      }
+    });
   }
+
+  function onCreateRoom() {
+    const roomName = prompt("생성할 방 이름을 입력해 주세요.");
+    if (!roomName) return alert("방 이름은 필수로 입력하여야 합니다.");
+
+    socket.emit("create-room", roomName, (response) => {
+      if (response.success) {
+        navigate(`/rooms/${response.payload}`);
+      } else {
+        alert("이미 존재하는 방입니다.");
+      }
+    });
+  }
+
+  useEffect(() => {
+    function roomListHandler(rooms) {
+      setRooms(rooms);
+    }
+
+    socket.emit("room-list", roomListHandler);
+
+    return () => {
+      socket.off("room-list", roomListHandler);
+    };
+  }, [rooms]);
+
   return (
     <Wrapper>
       <Circle top="-30vh" left="-30vh" diameter="70" color="blue" />
@@ -14,12 +47,16 @@ export default function Lobby() {
       <Circle top="40vh" left="70vw" diameter="90" color="yellow" />
       <RoomsContainer>
         <RoomsLists>
-          <Room>방이름 1</Room>
-          <Room>방이름 2</Room>
-          <Room>방이름 3</Room>
+          {rooms.map((roomName, index) => {
+            return (
+              <Room key={index} onClick={() => onClickRoom(roomName)}>
+                {roomName}
+              </Room>
+            );
+          })}
         </RoomsLists>
       </RoomsContainer>
-      <CreateRoomButton onClick={onClickHandler}>방 만들기</CreateRoomButton>
+      <CreateRoomButton onClick={onCreateRoom}>방 만들기</CreateRoomButton>
     </Wrapper>
   );
 }
