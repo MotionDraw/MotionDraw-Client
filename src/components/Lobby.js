@@ -45,7 +45,7 @@ export default function Lobby() {
     return () => {
       socket.off("roomList", roomListHandler);
     };
-  }, [rooms]);
+  }, []);
 
   return (
     <Wrapper>
@@ -54,10 +54,11 @@ export default function Lobby() {
       <Circle top="40vh" left="70vw" diameter="90" color="yellow" />
       <RoomsContainer>
         <RoomsLists>
-          {rooms.map((roomName, index) => {
+          {Object.values(rooms).map((element, index) => {
             return (
-              <Room key={index} onClick={() => onClickRoom(roomName)}>
-                {roomName}
+              <Room key={index} onClick={() => onClickRoom(element.roomName)}>
+                <div>방제목 : {element.roomName}</div>
+                <div>{element.playerCount} 명 접속</div>
               </Room>
             );
           })}
@@ -106,6 +107,7 @@ const RoomsLists = styled.div`
 const Room = styled.div`
   position: relative;
   display: flex;
+  justify-content: space-between;
   width: 90%;
   margin: 10px;
   padding: 20px;
