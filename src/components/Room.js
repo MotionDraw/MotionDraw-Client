@@ -1,9 +1,10 @@
+import styled from "styled-components";
+import Modal from "./Modal";
 import { useEffect, useRef, useState } from "react";
 import { drawLandmarks, drawConnectors } from "@mediapipe/drawing_utils";
 import { FilesetResolver, GestureRecognizer } from "@mediapipe/tasks-vision";
 import { HAND_CONNECTIONS } from "@mediapipe/hands";
 import { drawLine } from "../utils/drawLine";
-import styled from "styled-components";
 import modelAssetPath from "../assets/gesture_recognizer.task";
 import { drawCursor } from "../utils/drawCursor";
 import { useParams } from "react-router-dom";
@@ -35,8 +36,17 @@ export default function Room() {
   const [lineWidth, setLineWidth] = useState(2);
   const [initCanvas, setInitCanvas] = useState([]);
   const [isInitCanvas, setIsInitCanvas] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const historyData = useSelector((state) => state.history.history);
   const dispatch = useDispatch();
+
+  function modalOpenHandler() {
+    setIsModalOpen(true);
+  }
+
+  function modalCloseHandler() {
+    setIsModalOpen(false);
+  }
 
   useEffect(() => {
     const video = videoRef.current;
@@ -408,6 +418,8 @@ export default function Room() {
 
   return (
     <Wrapper>
+      <ShowModalButton onClick={modalOpenHandler}>?</ShowModalButton>
+      {isModalOpen && <Modal modalCloseHandler={modalCloseHandler} />}
       <LeftContainer>
         <ToolBox>
           <Circle diameter="10" color="red" />
@@ -504,4 +516,20 @@ const PaperCanvas = styled.canvas`
 const ToolBox = styled.div`
   display: flex;
   flex-wrap: wrap;
+`;
+
+const ShowModalButton = styled.button`
+  position: absolute;
+  height: 50px;
+  width: 50px;
+
+  font-size: 20px;
+  right: 10px;
+  bottom: 10px;
+  border: none;
+
+  z-index: 999;
+
+  border-radius: 50%;
+  cursor: pointer;
 `;
