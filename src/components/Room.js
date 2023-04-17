@@ -40,6 +40,7 @@ export default function Room() {
 
   useEffect(() => {
     const video = videoRef.current;
+
     async function getUserCamera() {
       let stream = null;
 
@@ -55,6 +56,10 @@ export default function Room() {
     }
 
     getUserCamera();
+
+    return () => {
+      video.srcObject = null;
+    };
   }, [videoRef]);
 
   useEffect(() => {
