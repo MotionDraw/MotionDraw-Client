@@ -1,14 +1,17 @@
 import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
 import { useState, useEffect } from "react";
 import { socket } from "./App";
+import { initHistory } from "../features/history/historySlice";
 
 export default function Lobby() {
   const [rooms, setRooms] = useState([]);
+  const dispatch = useDispatch();
   const navigate = useNavigate();
 
   function onClickRoom(roomName) {
-    socket.emit("join-room", roomName, (response) => {
+    socket.emit("joinRoom", roomName, (response) => {
       if (response.success) {
         navigate(`/rooms/${response.payload}`);
       }
@@ -19,7 +22,7 @@ export default function Lobby() {
     const roomName = prompt("생성할 방 이름을 입력해 주세요.");
     if (!roomName) return alert("방 이름은 필수로 입력하여야 합니다.");
 
-    socket.emit("create-room", roomName, (response) => {
+    socket.emit("createRoom", roomName, (response) => {
       if (response.success) {
         navigate(`/rooms/${response.payload}`);
       } else {
@@ -29,14 +32,18 @@ export default function Lobby() {
   }
 
   useEffect(() => {
+    dispatch(initHistory());
+  }, [dispatch]);
+
+  useEffect(() => {
     function roomListHandler(rooms) {
       setRooms(rooms);
     }
 
-    socket.emit("room-list", roomListHandler);
+    socket.emit("roomList", roomListHandler);
 
     return () => {
-      socket.off("room-list", roomListHandler);
+      socket.off("roomList", roomListHandler);
     };
   }, [rooms]);
 

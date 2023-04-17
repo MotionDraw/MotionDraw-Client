@@ -19,6 +19,8 @@ import {
   THICKNESS,
 } from "../constants/canvasConfig";
 import { socket } from "./App";
+import { useDispatch, useSelector } from "react-redux";
+import { pushHistory, setHistory } from "../features/history/historySlice";
 
 export default function Room() {
   const videoRef = useRef(null);
@@ -31,14 +33,17 @@ export default function Room() {
   const [color, setColor] = useState("black");
   const [mode, setMode] = useState("Move");
   const [lineWidth, setLineWidth] = useState(2);
+  const [initCanvas, setInitCanvas] = useState([]);
+  const [isInitCanvas, setIsInitCanvas] = useState(false);
+  const historyData = useSelector((state) => state.history.history);
+  const dispatch = useDispatch();
 
   useEffect(() => {
+    const video = videoRef.current;
     async function getUserCamera() {
       let stream = null;
 
       try {
-        const video = videoRef.current;
-
         stream = await navigator.mediaDevices.getUserMedia({ video: true });
 
         video.srcObject = stream;
@@ -57,7 +62,7 @@ export default function Room() {
       if (!cleanupCalled.current) {
         cleanupCalled.current = true;
       } else {
-        socket.emit("leave-room", roomName);
+        socket.emit("leaveRoom", roomName);
       }
     };
   }, [roomName]);
@@ -150,6 +155,34 @@ export default function Room() {
           } else {
             setMode("Draw");
           }
+
+          dispatch(
+            pushHistory({
+              result: gestureRecognitionResult,
+              x:
+                gestureRecognitionResult.landmarks[0][8].x *
+                paperCanvasRef.current.width,
+              y:
+                gestureRecognitionResult.landmarks[0][8].y *
+                paperCanvasRef.current.height,
+              color: color,
+              lineWidth: lineWidth,
+              mode: mode,
+            })
+          );
+
+          socket.emit("drawLine", roomName, {
+            result: gestureRecognitionResult,
+            x:
+              gestureRecognitionResult.landmarks[0][8].x *
+              paperCanvasRef.current.width,
+            y:
+              gestureRecognitionResult.landmarks[0][8].y *
+              paperCanvasRef.current.height,
+            color: color,
+            lineWidth: lineWidth,
+            mode: mode,
+          });
 
           drawLine(
             gestureRecognitionResult,
@@ -306,6 +339,68 @@ export default function Room() {
     };
   }, [gestureRecognizer, color, mode, lineWidth]);
 
+  useEffect(() => {
+    if (isInitCanvas) {
+      socket.off("requestData");
+      return;
+    }
+    socket.emit("sendHistory", roomName);
+  }, [isInitCanvas, roomName]);
+
+  useEffect(() => {
+    socket.on("requestData", (roomName) => {
+      socket.emit("callbackData", roomName, historyData);
+    });
+
+    return () => {
+      socket.off("requestData");
+    };
+  }, [historyData, roomName]);
+
+  useEffect(() => {
+    socket.on("initCanvas", (data) => {
+      dispatch(setHistory(data));
+      setInitCanvas(data);
+      setIsInitCanvas(true);
+    });
+    return () => {
+      socket.off("initCanvas");
+      setIsInitCanvas(false);
+    };
+  }, [dispatch]);
+
+  useEffect(() => {
+    const ctx = paperCanvasRef.current.getContext("2d");
+
+    for (let i = 0; i < initCanvas.length; i += 1) {
+      drawLine(
+        initCanvas[i].result,
+        ctx,
+        initCanvas[i].x,
+        initCanvas[i].y,
+        initCanvas[i].color,
+        initCanvas[i].lineWidth,
+        initCanvas[i].mode
+      );
+    }
+  }, [initCanvas]);
+
+  useEffect(() => {
+    const ctx = paperCanvasRef.current.getContext("2d");
+
+    socket.on("draw", (data) => {
+      drawLine(
+        data.result,
+        ctx,
+        data.x,
+        data.y,
+        data.color,
+        data.lineWidth,
+        data.mode
+      );
+    });
+  }, []);
+
   return (
     <Wrapper>
       <LeftContainer>
@@ -326,8 +421,8 @@ export default function Room() {
       </LeftContainer>
       <RightContainer>
         <Paper></Paper>
-        <PaperCanvas ref={paperCanvasRef} />
-        <PaperCanvas ref={cursorCanvasRef} />
+        <PaperCanvas ref={paperCanvasRef} width="960px" height="540px" />
+        <PaperCanvas ref={cursorCanvasRef} width="960px" height="540px" />
       </RightContainer>
     </Wrapper>
   );
@@ -399,8 +494,6 @@ const PaperCanvas = styled.canvas`
   top: 50;
   left: 50;
   z-index: 9;
-  width: 960px;
-  height: 540px;
   transform: rotateY(180deg);
 `;
 const ToolBox = styled.div`
