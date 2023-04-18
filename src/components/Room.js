@@ -22,6 +22,7 @@ import {
 import { socket } from "./App";
 import { useDispatch, useSelector } from "react-redux";
 import { pushHistory, setHistory } from "../features/history/historySlice";
+import MyCursor from "./MyCursor";
 
 export default function Room() {
   const videoRef = useRef(null);
@@ -418,6 +419,7 @@ export default function Room() {
 
   return (
     <Wrapper>
+      <MyCursor canvas={paperCanvasRef} />
       <ShowModalButton onClick={modalOpenHandler}>?</ShowModalButton>
       {isModalOpen && <Modal modalCloseHandler={modalCloseHandler} />}
       <LeftContainer>
