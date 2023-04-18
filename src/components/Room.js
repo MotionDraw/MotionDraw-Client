@@ -1,4 +1,4 @@
-import styled from "styled-components";
+import styled, { keyframes, css } from "styled-components";
 import Modal from "./Modal";
 import { useEffect, useRef, useState } from "react";
 import { drawLandmarks, drawConnectors } from "@mediapipe/drawing_utils";
@@ -31,7 +31,7 @@ export default function Room() {
   const cleanupCalled = useRef(false);
   const { roomName } = useParams();
   const [gestureRecognizer, setGestureRecognizer] = useState();
-  const [color, setColor] = useState("black");
+  const [selectedColor, setSelectedColor] = useState("black");
   const [mode, setMode] = useState("Move");
   const [lineWidth, setLineWidth] = useState(2);
   const [initCanvas, setInitCanvas] = useState([]);
@@ -134,11 +134,11 @@ export default function Room() {
           for (const landmarks of gestureRecognitionResult.landmarks) {
             drawConnectors(videoCtx, landmarks, HAND_CONNECTIONS, {
               color: "#00FF00",
-              lineWidth: 1,
+              lineWidth: 2,
             });
             drawLandmarks(videoCtx, landmarks, {
               color: "#FF0000",
-              lineWidth: 1,
+              radius: 2,
             });
           }
 
@@ -149,7 +149,7 @@ export default function Room() {
               paperCanvasRef.current.width,
             gestureRecognitionResult.landmarks[0][8].y *
               paperCanvasRef.current.height,
-            color,
+            selectedColor,
             lineWidth,
             mode
           );
@@ -180,7 +180,7 @@ export default function Room() {
               y:
                 gestureRecognitionResult.landmarks[0][8].y *
                 paperCanvasRef.current.height,
-              color: color,
+              selectedColor: selectedColor,
               lineWidth: lineWidth,
               mode: mode,
             })
@@ -194,7 +194,7 @@ export default function Room() {
             y:
               gestureRecognitionResult.landmarks[0][8].y *
               paperCanvasRef.current.height,
-            color: color,
+            selectedColor: selectedColor,
             lineWidth: lineWidth,
             mode: mode,
           });
@@ -206,7 +206,7 @@ export default function Room() {
               paperCanvasRef.current.width,
             gestureRecognitionResult.landmarks[0][8].y *
               paperCanvasRef.current.height,
-            color,
+            selectedColor,
             lineWidth,
             mode
           );
@@ -217,12 +217,12 @@ export default function Room() {
           if (
             gestureRecognitionResult.gestures[0][0].categoryName === "Thumb_Up"
           ) {
-            changePrevColor(setColor);
+            changePrevColor(setSelectedColor);
           } else if (
             gestureRecognitionResult.gestures[0][0].categoryName ===
             "Thumb_Down"
           ) {
-            changeNextColor(setColor);
+            changeNextColor(setSelectedColor);
           } else if (
             gestureRecognitionResult.gestures[0][0].categoryName === "Open_Palm"
           ) {
@@ -256,12 +256,12 @@ export default function Room() {
           if (
             gestureRecognitionResult.gestures[1][0].categoryName === "Thumb_Up"
           ) {
-            changePrevColor(setColor);
+            changePrevColor(setSelectedColor);
           } else if (
             gestureRecognitionResult.gestures[1][0].categoryName ===
             "Thumb_Down"
           ) {
-            changeNextColor(setColor);
+            changeNextColor(setSelectedColor);
           } else if (
             gestureRecognitionResult.gestures[1][0].categoryName === "Open_Palm"
           ) {
@@ -284,7 +284,7 @@ export default function Room() {
               paperCanvasRef.current.width,
             gestureRecognitionResult.landmarks[0][8].y *
               paperCanvasRef.current.height,
-            color,
+            selectedColor,
             lineWidth,
             mode
           );
@@ -307,12 +307,12 @@ export default function Room() {
           if (
             gestureRecognitionResult.gestures[0][0].categoryName === "Thumb_Up"
           ) {
-            changePrevColor(setColor);
+            changePrevColor(setSelectedColor);
           } else if (
             gestureRecognitionResult.gestures[0][0].categoryName ===
             "Thumb_Down"
           ) {
-            changeNextColor(setColor);
+            changeNextColor(setSelectedColor);
           } else if (
             gestureRecognitionResult.gestures[0][0].categoryName === "Open_Palm"
           ) {
@@ -335,7 +335,7 @@ export default function Room() {
               paperCanvasRef.current.width,
             gestureRecognitionResult.landmarks[1][8].y *
               paperCanvasRef.current.height,
-            color,
+            selectedColor,
             lineWidth,
             mode
           );
@@ -352,7 +352,7 @@ export default function Room() {
     return () => {
       clearInterval(id);
     };
-  }, [gestureRecognizer, color, mode, lineWidth]);
+  }, [gestureRecognizer, selectedColor, mode, lineWidth]);
 
   useEffect(() => {
     if (isInitCanvas) {
@@ -393,7 +393,7 @@ export default function Room() {
         ctx,
         initCanvas[i].x,
         initCanvas[i].y,
-        initCanvas[i].color,
+        initCanvas[i].selectedColor,
         initCanvas[i].lineWidth,
         initCanvas[i].mode
       );
@@ -409,7 +409,7 @@ export default function Room() {
         ctx,
         data.x,
         data.y,
-        data.color,
+        data.selectedColor,
         data.lineWidth,
         data.mode
       );
@@ -422,12 +422,12 @@ export default function Room() {
       {isModalOpen && <Modal modalCloseHandler={modalCloseHandler} />}
       <LeftContainer>
         <ToolBox>
-          <Circle diameter="10" color="red" />
-          <Circle diameter="10" color="orange" />
-          <Circle diameter="10" color="yellow" />
-          <Circle diameter="10" color="blue" />
-          <Circle diameter="10" color="green" />
-          <Circle diameter="10" color="black" />
+          <Circle diameter="10" color="red" selectedColor={selectedColor} />
+          <Circle diameter="10" color="orange" selectedColor={selectedColor} />
+          <Circle diameter="10" color="yellow" selectedColor={selectedColor} />
+          <Circle diameter="10" color="blue" selectedColor={selectedColor} />
+          <Circle diameter="10" color="green" selectedColor={selectedColor} />
+          <Circle diameter="10" color="black" selectedColor={selectedColor} />
         </ToolBox>
         <div>{mode}</div>
         <div>{lineWidth}</div>
@@ -454,12 +454,26 @@ const Wrapper = styled.div`
   overflow: hidden;
 `;
 
+const bounce = keyframes`
+  0% {
+    transform: translate(0);
+  }
+  100% {
+    transform: translateY(-20px);
+  }
+`;
+
 const Circle = styled.div`
   margin: 10px;
   width: ${(props) => `${props.diameter}vh`};
   height: ${(props) => `${props.diameter}vh`};
   background-color: ${(props) => props.color};
   border-radius: 50%;
+  animation: ${(props) =>
+    props.selectedColor === props.color &&
+    css`
+      ${bounce} 0.3s linear 0s infinite alternate
+    `};
   border: 5px solid rgb(255, 255, 255);
 `;
 
@@ -513,6 +527,7 @@ const PaperCanvas = styled.canvas`
   z-index: 9;
   transform: rotateY(180deg);
 `;
+
 const ToolBox = styled.div`
   display: flex;
   flex-wrap: wrap;
