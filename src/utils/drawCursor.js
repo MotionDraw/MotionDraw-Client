@@ -1,5 +1,5 @@
 export function drawCursor(result, ctx, x, y, color, lineWidth, mode) {
-  const eraserSize = lineWidth * 5;
+  const eraserSize = lineWidth * 10;
   const radius = lineWidth / 2;
 
   if (result.handednesses.length > 0) {

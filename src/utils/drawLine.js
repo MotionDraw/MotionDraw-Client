@@ -1,7 +1,7 @@
 let prevMode = "";
 
 export function drawLine(result, ctx, x, y, color, lineWidth, mode) {
-  const eraserSize = lineWidth * 5;
+  const eraserSize = lineWidth * 10;
 
   if (result.handednesses.length > 0) {
     if (mode === "Move") {

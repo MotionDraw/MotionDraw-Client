@@ -23,6 +23,7 @@ import { socket } from "./App";
 import { useDispatch, useSelector } from "react-redux";
 import { pushHistory, setHistory } from "../features/history/historySlice";
 import MyCursor from "./MyCursor";
+import { drawStraightLine } from "../utils/drawShape";
 
 export default function Room() {
   const videoRef = useRef(null);
@@ -38,6 +39,7 @@ export default function Room() {
   const [initCanvas, setInitCanvas] = useState([]);
   const [isInitCanvas, setIsInitCanvas] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isShapeReady, setIsShapeReady] = useState(false);
   const historyData = useSelector((state) => state.history.history);
   const dispatch = useDispatch();
 
@@ -278,6 +280,50 @@ export default function Room() {
             }
           }
 
+          if (
+            gestureRecognitionResult.gestures[0][0].categoryName ===
+              "ILoveYou" &&
+            gestureRecognitionResult.gestures[1][0].categoryName === "ILoveYou"
+          ) {
+            setIsShapeReady(false);
+            drawStraightLine(
+              paperCtx,
+              gestureRecognitionResult.landmarks[1][8].x *
+                paperCanvasRef.current.width,
+              gestureRecognitionResult.landmarks[1][8].y *
+                paperCanvasRef.current.height,
+              gestureRecognitionResult.landmarks[0][8].x *
+                paperCanvasRef.current.width,
+              gestureRecognitionResult.landmarks[0][8].y *
+                paperCanvasRef.current.height,
+              lineWidth,
+              isShapeReady
+            );
+          } else if (
+            gestureRecognitionResult.gestures[0][0].categoryName ===
+              "Open_Palm" &&
+            gestureRecognitionResult.gestures[1][0].categoryName === "ILoveYou"
+          ) {
+            setIsShapeReady(true);
+            drawStraightLine(
+              paperCtx,
+              gestureRecognitionResult.landmarks[1][8].x *
+                paperCanvasRef.current.width,
+              gestureRecognitionResult.landmarks[1][8].y *
+                paperCanvasRef.current.height,
+              gestureRecognitionResult.landmarks[0][8].x *
+                paperCanvasRef.current.width,
+              gestureRecognitionResult.landmarks[0][8].y *
+                paperCanvasRef.current.height,
+              lineWidth,
+              isShapeReady
+            );
+          }
+
+          if (
+            gestureRecognitionResult.gestures[1][0].categoryName === "ILoveYou"
+          )
+            return;
           drawLine(
             gestureRecognitionResult,
             paperCtx,
@@ -329,6 +375,50 @@ export default function Room() {
             }
           }
 
+          if (
+            gestureRecognitionResult.gestures[0][0].categoryName ===
+              "ILoveYou" &&
+            gestureRecognitionResult.gestures[1][0].categoryName === "ILoveYou"
+          ) {
+            setIsShapeReady(false);
+            drawStraightLine(
+              paperCtx,
+              gestureRecognitionResult.landmarks[1][8].x *
+                paperCanvasRef.current.width,
+              gestureRecognitionResult.landmarks[1][8].y *
+                paperCanvasRef.current.height,
+              gestureRecognitionResult.landmarks[0][8].x *
+                paperCanvasRef.current.width,
+              gestureRecognitionResult.landmarks[0][8].y *
+                paperCanvasRef.current.height,
+              lineWidth,
+              isShapeReady
+            );
+          } else if (
+            gestureRecognitionResult.gestures[0][0].categoryName ===
+              "ILoveYou" &&
+            gestureRecognitionResult.gestures[1][0].categoryName === "Open_Palm"
+          ) {
+            setIsShapeReady(true);
+            drawStraightLine(
+              paperCtx,
+              gestureRecognitionResult.landmarks[1][8].x *
+                paperCanvasRef.current.width,
+              gestureRecognitionResult.landmarks[1][8].y *
+                paperCanvasRef.current.height,
+              gestureRecognitionResult.landmarks[0][8].x *
+                paperCanvasRef.current.width,
+              gestureRecognitionResult.landmarks[0][8].y *
+                paperCanvasRef.current.height,
+              lineWidth,
+              isShapeReady
+            );
+          }
+
+          if (
+            gestureRecognitionResult.gestures[0][0].categoryName === "ILoveYou"
+          )
+            return;
           drawLine(
             gestureRecognitionResult,
             paperCtx,
@@ -341,7 +431,6 @@ export default function Room() {
             mode
           );
         }
-
         videoCtx.restore();
       }
     }
@@ -353,7 +442,7 @@ export default function Room() {
     return () => {
       clearInterval(id);
     };
-  }, [gestureRecognizer, selectedColor, mode, lineWidth]);
+  }, [gestureRecognizer, selectedColor, mode, lineWidth, isShapeReady]);
 
   useEffect(() => {
     if (isInitCanvas) {
