@@ -23,7 +23,11 @@ import { socket } from "./App";
 import { useDispatch, useSelector } from "react-redux";
 import { pushHistory, setHistory } from "../features/history/historySlice";
 import MyCursor from "./MyCursor";
-import { drawStraightLine } from "../utils/drawShape";
+import {
+  drawStraightLine,
+  drawRectangle,
+  drawCircle,
+} from "../utils/drawShape";
 
 export default function Room() {
   const videoRef = useRef(null);
@@ -35,6 +39,7 @@ export default function Room() {
   const [gestureRecognizer, setGestureRecognizer] = useState();
   const [selectedColor, setSelectedColor] = useState("black");
   const [mode, setMode] = useState("Move");
+  const [shape, setShape] = useState("");
   const [lineWidth, setLineWidth] = useState(2);
   const [initCanvas, setInitCanvas] = useState([]);
   const [isInitCanvas, setIsInitCanvas] = useState(false);
@@ -286,44 +291,78 @@ export default function Room() {
             gestureRecognitionResult.gestures[1][0].categoryName === "ILoveYou"
           ) {
             setIsShapeReady(false);
-            drawStraightLine(
-              paperCtx,
-              gestureRecognitionResult.landmarks[1][8].x *
-                paperCanvasRef.current.width,
-              gestureRecognitionResult.landmarks[1][8].y *
-                paperCanvasRef.current.height,
-              gestureRecognitionResult.landmarks[0][8].x *
-                paperCanvasRef.current.width,
-              gestureRecognitionResult.landmarks[0][8].y *
-                paperCanvasRef.current.height,
-              lineWidth,
-              isShapeReady
-            );
+            setShape("StraightLine");
           } else if (
+            gestureRecognitionResult.gestures[0][0].categoryName ===
+              "Victory" &&
+            gestureRecognitionResult.gestures[1][0].categoryName === "ILoveYou"
+          ) {
+            setIsShapeReady(false);
+            setShape("Rectangle");
+          } else if (
+            gestureRecognitionResult.gestures[0][0].categoryName ===
+              "Pointing_Up" &&
+            gestureRecognitionResult.gestures[1][0].categoryName === "ILoveYou"
+          ) {
+            setIsShapeReady(false);
+            setShape("Circle");
+          }
+
+          if (
             gestureRecognitionResult.gestures[0][0].categoryName ===
               "Open_Palm" &&
             gestureRecognitionResult.gestures[1][0].categoryName === "ILoveYou"
           ) {
             setIsShapeReady(true);
-            drawStraightLine(
-              paperCtx,
-              gestureRecognitionResult.landmarks[1][8].x *
-                paperCanvasRef.current.width,
-              gestureRecognitionResult.landmarks[1][8].y *
-                paperCanvasRef.current.height,
-              gestureRecognitionResult.landmarks[0][8].x *
-                paperCanvasRef.current.width,
-              gestureRecognitionResult.landmarks[0][8].y *
-                paperCanvasRef.current.height,
-              lineWidth,
-              isShapeReady
-            );
+            if (shape === "StraightLine") {
+              drawStraightLine(
+                paperCtx,
+                gestureRecognitionResult.landmarks[1][8].x *
+                  paperCanvasRef.current.width,
+                gestureRecognitionResult.landmarks[1][8].y *
+                  paperCanvasRef.current.height,
+                gestureRecognitionResult.landmarks[0][8].x *
+                  paperCanvasRef.current.width,
+                gestureRecognitionResult.landmarks[0][8].y *
+                  paperCanvasRef.current.height,
+                lineWidth,
+                isShapeReady
+              );
+            } else if (shape === "Rectangle") {
+              drawRectangle(
+                paperCtx,
+                gestureRecognitionResult.landmarks[1][8].x *
+                  paperCanvasRef.current.width,
+                gestureRecognitionResult.landmarks[1][8].y *
+                  paperCanvasRef.current.height,
+                gestureRecognitionResult.landmarks[0][8].x *
+                  paperCanvasRef.current.width,
+                gestureRecognitionResult.landmarks[0][8].y *
+                  paperCanvasRef.current.height,
+                lineWidth,
+                isShapeReady
+              );
+            } else if (shape === "Circle") {
+              drawCircle(
+                paperCtx,
+                gestureRecognitionResult.landmarks[1][8].x *
+                  paperCanvasRef.current.width,
+                gestureRecognitionResult.landmarks[1][8].y *
+                  paperCanvasRef.current.height,
+                gestureRecognitionResult.landmarks[0][8].x *
+                  paperCanvasRef.current.width,
+                gestureRecognitionResult.landmarks[0][8].y *
+                  paperCanvasRef.current.height,
+                isShapeReady
+              );
+            }
           }
 
           if (
             gestureRecognitionResult.gestures[1][0].categoryName === "ILoveYou"
           )
             return;
+
           drawLine(
             gestureRecognitionResult,
             paperCtx,
@@ -381,44 +420,79 @@ export default function Room() {
             gestureRecognitionResult.gestures[1][0].categoryName === "ILoveYou"
           ) {
             setIsShapeReady(false);
-            drawStraightLine(
-              paperCtx,
-              gestureRecognitionResult.landmarks[1][8].x *
-                paperCanvasRef.current.width,
-              gestureRecognitionResult.landmarks[1][8].y *
-                paperCanvasRef.current.height,
-              gestureRecognitionResult.landmarks[0][8].x *
-                paperCanvasRef.current.width,
-              gestureRecognitionResult.landmarks[0][8].y *
-                paperCanvasRef.current.height,
-              lineWidth,
-              isShapeReady
-            );
+            setShape("StraightLine");
           } else if (
+            gestureRecognitionResult.gestures[0][0].categoryName ===
+              "ILoveYou" &&
+            gestureRecognitionResult.gestures[1][0].categoryName === "Victory"
+          ) {
+            setIsShapeReady(false);
+            setShape("Rectangle");
+          } else if (
+            gestureRecognitionResult.gestures[0][0].categoryName ===
+              "ILoveYou" &&
+            gestureRecognitionResult.gestures[1][0].categoryName ===
+              "Pointing_Up"
+          ) {
+            setIsShapeReady(false);
+            setShape("Circle");
+          }
+
+          if (
             gestureRecognitionResult.gestures[0][0].categoryName ===
               "ILoveYou" &&
             gestureRecognitionResult.gestures[1][0].categoryName === "Open_Palm"
           ) {
             setIsShapeReady(true);
-            drawStraightLine(
-              paperCtx,
-              gestureRecognitionResult.landmarks[1][8].x *
-                paperCanvasRef.current.width,
-              gestureRecognitionResult.landmarks[1][8].y *
-                paperCanvasRef.current.height,
-              gestureRecognitionResult.landmarks[0][8].x *
-                paperCanvasRef.current.width,
-              gestureRecognitionResult.landmarks[0][8].y *
-                paperCanvasRef.current.height,
-              lineWidth,
-              isShapeReady
-            );
+            if (shape === "StraightLine") {
+              drawStraightLine(
+                paperCtx,
+                gestureRecognitionResult.landmarks[1][8].x *
+                  paperCanvasRef.current.width,
+                gestureRecognitionResult.landmarks[1][8].y *
+                  paperCanvasRef.current.height,
+                gestureRecognitionResult.landmarks[0][8].x *
+                  paperCanvasRef.current.width,
+                gestureRecognitionResult.landmarks[0][8].y *
+                  paperCanvasRef.current.height,
+                lineWidth,
+                isShapeReady
+              );
+            } else if (shape === "Rectangle") {
+              drawRectangle(
+                paperCtx,
+                gestureRecognitionResult.landmarks[1][8].x *
+                  paperCanvasRef.current.width,
+                gestureRecognitionResult.landmarks[1][8].y *
+                  paperCanvasRef.current.height,
+                gestureRecognitionResult.landmarks[0][8].x *
+                  paperCanvasRef.current.width,
+                gestureRecognitionResult.landmarks[0][8].y *
+                  paperCanvasRef.current.height,
+                lineWidth,
+                isShapeReady
+              );
+            } else if (shape === "Circle") {
+              drawCircle(
+                paperCtx,
+                gestureRecognitionResult.landmarks[1][8].x *
+                  paperCanvasRef.current.width,
+                gestureRecognitionResult.landmarks[1][8].y *
+                  paperCanvasRef.current.height,
+                gestureRecognitionResult.landmarks[0][8].x *
+                  paperCanvasRef.current.width,
+                gestureRecognitionResult.landmarks[0][8].y *
+                  paperCanvasRef.current.height,
+                isShapeReady
+              );
+            }
           }
 
           if (
             gestureRecognitionResult.gestures[0][0].categoryName === "ILoveYou"
           )
             return;
+
           drawLine(
             gestureRecognitionResult,
             paperCtx,
