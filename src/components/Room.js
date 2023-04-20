@@ -15,6 +15,7 @@ import {
   increasesLineWidth,
 } from "../utils/toolHand";
 import {
+  CANVAS_HEIGHT_OFFSET,
   MAX_THICKNESS,
   MIN_THICKNESS,
   THICKNESS,
@@ -143,6 +144,13 @@ export default function Room() {
         videoCanvasRef.current.height = videoHeight;
 
         if (gestureRecognitionResult.landmarks.length > 0) {
+          const rightHandXPosition =
+            gestureRecognitionResult.landmarks[0][8].x *
+            paperCanvasRef.current.width;
+          const rightHandYPosition =
+            gestureRecognitionResult.landmarks[0][8].y *
+            paperCanvasRef.current.height *
+            CANVAS_HEIGHT_OFFSET;
           for (const landmarks of gestureRecognitionResult.landmarks) {
             drawConnectors(videoCtx, landmarks, HAND_CONNECTIONS, {
               color: "#00FF00",
@@ -157,10 +165,8 @@ export default function Room() {
           drawCursor(
             gestureRecognitionResult,
             cursorCtx,
-            gestureRecognitionResult.landmarks[0][8].x *
-              paperCanvasRef.current.width,
-            gestureRecognitionResult.landmarks[0][8].y *
-              paperCanvasRef.current.height,
+            rightHandXPosition,
+            rightHandYPosition,
             selectedColor,
             lineWidth,
             mode
@@ -171,6 +177,14 @@ export default function Room() {
           gestureRecognitionResult.handednesses.length === 1 &&
           gestureRecognitionResult.handednesses[0][0].categoryName === "Left"
         ) {
+          const rightHandXPosition =
+            gestureRecognitionResult.landmarks[0][8].x *
+            paperCanvasRef.current.width;
+          const rightHandYPosition =
+            gestureRecognitionResult.landmarks[0][8].y *
+            paperCanvasRef.current.height *
+            CANVAS_HEIGHT_OFFSET;
+
           if (
             gestureRecognitionResult.gestures[0][0].categoryName === "Open_Palm"
           ) {
@@ -186,12 +200,8 @@ export default function Room() {
           dispatch(
             pushHistory({
               result: gestureRecognitionResult,
-              x:
-                gestureRecognitionResult.landmarks[0][8].x *
-                paperCanvasRef.current.width,
-              y:
-                gestureRecognitionResult.landmarks[0][8].y *
-                paperCanvasRef.current.height,
+              x: rightHandXPosition,
+              y: rightHandYPosition,
               selectedColor: selectedColor,
               lineWidth: lineWidth,
               mode: mode,
@@ -200,23 +210,15 @@ export default function Room() {
 
           dispatch(
             setRightCursorPosition({
-              x:
-                gestureRecognitionResult.landmarks[0][8].x *
-                paperCanvasRef.current.width,
-              y:
-                gestureRecognitionResult.landmarks[0][8].y *
-                paperCanvasRef.current.height,
+              x: rightHandXPosition,
+              y: rightHandYPosition,
             })
           );
 
           socket.emit("drawLine", roomName, {
             result: gestureRecognitionResult,
-            x:
-              gestureRecognitionResult.landmarks[0][8].x *
-              paperCanvasRef.current.width,
-            y:
-              gestureRecognitionResult.landmarks[0][8].y *
-              paperCanvasRef.current.height,
+            x: rightHandXPosition,
+            y: rightHandYPosition,
             selectedColor: selectedColor,
             lineWidth: lineWidth,
             mode: mode,
@@ -225,10 +227,8 @@ export default function Room() {
           drawLine(
             gestureRecognitionResult,
             paperCtx,
-            gestureRecognitionResult.landmarks[0][8].x *
-              paperCanvasRef.current.width,
-            gestureRecognitionResult.landmarks[0][8].y *
-              paperCanvasRef.current.height,
+            rightHandXPosition,
+            rightHandYPosition,
             selectedColor,
             lineWidth,
             mode
@@ -237,6 +237,14 @@ export default function Room() {
           gestureRecognitionResult.handednesses.length === 1 &&
           gestureRecognitionResult.handednesses[0][0].categoryName === "Right"
         ) {
+          const leftHandXPosition =
+            gestureRecognitionResult.landmarks[0][8].x *
+            paperCanvasRef.current.width;
+          const leftHandYPosition =
+            gestureRecognitionResult.landmarks[0][8].y *
+            paperCanvasRef.current.height *
+            CANVAS_HEIGHT_OFFSET;
+
           if (
             gestureRecognitionResult.gestures[0][0].categoryName === "Thumb_Up"
           ) {
@@ -263,18 +271,29 @@ export default function Room() {
 
           dispatch(
             setLeftCursorPosition({
-              x:
-                gestureRecognitionResult.landmarks[0][8].x *
-                paperCanvasRef.current.width,
-              y:
-                gestureRecognitionResult.landmarks[0][8].y *
-                paperCanvasRef.current.height,
+              x: leftHandXPosition,
+              y: leftHandYPosition,
             })
           );
         } else if (
           gestureRecognitionResult.handednesses.length === 2 &&
           gestureRecognitionResult.handednesses[0][0].categoryName === "Left"
         ) {
+          const leftHandXPosition =
+            gestureRecognitionResult.landmarks[1][8].x *
+            paperCanvasRef.current.width;
+          const leftHandYPosition =
+            gestureRecognitionResult.landmarks[1][8].y *
+            paperCanvasRef.current.height *
+            CANVAS_HEIGHT_OFFSET;
+          const rightHandXPosition =
+            gestureRecognitionResult.landmarks[0][8].x *
+            paperCanvasRef.current.width;
+          const rightHandYPosition =
+            gestureRecognitionResult.landmarks[0][8].y *
+            paperCanvasRef.current.height *
+            CANVAS_HEIGHT_OFFSET;
+
           if (
             gestureRecognitionResult.gestures[0][0].categoryName === "Open_Palm"
           ) {
@@ -343,42 +362,30 @@ export default function Room() {
             if (shape === "StraightLine") {
               drawStraightLine(
                 paperCtx,
-                gestureRecognitionResult.landmarks[1][8].x *
-                  paperCanvasRef.current.width,
-                gestureRecognitionResult.landmarks[1][8].y *
-                  paperCanvasRef.current.height,
-                gestureRecognitionResult.landmarks[0][8].x *
-                  paperCanvasRef.current.width,
-                gestureRecognitionResult.landmarks[0][8].y *
-                  paperCanvasRef.current.height,
+                leftHandXPosition,
+                leftHandYPosition,
+                rightHandXPosition,
+                rightHandYPosition,
                 lineWidth,
                 isShapeReady
               );
             } else if (shape === "Rectangle") {
               drawRectangle(
                 paperCtx,
-                gestureRecognitionResult.landmarks[1][8].x *
-                  paperCanvasRef.current.width,
-                gestureRecognitionResult.landmarks[1][8].y *
-                  paperCanvasRef.current.height,
-                gestureRecognitionResult.landmarks[0][8].x *
-                  paperCanvasRef.current.width,
-                gestureRecognitionResult.landmarks[0][8].y *
-                  paperCanvasRef.current.height,
+                leftHandXPosition,
+                leftHandYPosition,
+                rightHandXPosition,
+                rightHandYPosition,
                 lineWidth,
                 isShapeReady
               );
             } else if (shape === "Circle") {
               drawCircle(
                 paperCtx,
-                gestureRecognitionResult.landmarks[1][8].x *
-                  paperCanvasRef.current.width,
-                gestureRecognitionResult.landmarks[1][8].y *
-                  paperCanvasRef.current.height,
-                gestureRecognitionResult.landmarks[0][8].x *
-                  paperCanvasRef.current.width,
-                gestureRecognitionResult.landmarks[0][8].y *
-                  paperCanvasRef.current.height,
+                leftHandXPosition,
+                leftHandYPosition,
+                rightHandXPosition,
+                rightHandYPosition,
                 isShapeReady
               );
             }
@@ -386,22 +393,14 @@ export default function Room() {
 
           dispatch(
             setLeftCursorPosition({
-              x:
-                gestureRecognitionResult.landmarks[1][8].x *
-                paperCanvasRef.current.width,
-              y:
-                gestureRecognitionResult.landmarks[1][8].y *
-                paperCanvasRef.current.height,
+              x: leftHandXPosition,
+              y: leftHandYPosition,
             })
           );
           dispatch(
             setRightCursorPosition({
-              x:
-                gestureRecognitionResult.landmarks[0][8].x *
-                paperCanvasRef.current.width,
-              y:
-                gestureRecognitionResult.landmarks[0][8].y *
-                paperCanvasRef.current.height,
+              x: rightHandXPosition,
+              y: rightHandYPosition,
             })
           );
 
@@ -413,10 +412,8 @@ export default function Room() {
           drawLine(
             gestureRecognitionResult,
             paperCtx,
-            gestureRecognitionResult.landmarks[0][8].x *
-              paperCanvasRef.current.width,
-            gestureRecognitionResult.landmarks[0][8].y *
-              paperCanvasRef.current.height,
+            rightHandXPosition,
+            rightHandYPosition,
             selectedColor,
             lineWidth,
             mode
@@ -425,6 +422,21 @@ export default function Room() {
           gestureRecognitionResult.handednesses.length === 2 &&
           gestureRecognitionResult.handednesses[0][0].categoryName === "Right"
         ) {
+          const leftHandXPosition =
+            gestureRecognitionResult.landmarks[0][8].x *
+            paperCanvasRef.current.width;
+          const leftHandYPosition =
+            gestureRecognitionResult.landmarks[0][8].y *
+            paperCanvasRef.current.height *
+            CANVAS_HEIGHT_OFFSET;
+          const rightHandXPosition =
+            gestureRecognitionResult.landmarks[1][8].x *
+            paperCanvasRef.current.width;
+          const rightHandYPosition =
+            gestureRecognitionResult.landmarks[1][8].y *
+            paperCanvasRef.current.height *
+            CANVAS_HEIGHT_OFFSET;
+
           if (
             gestureRecognitionResult.gestures[1][0].categoryName === "Open_Palm"
           ) {
@@ -494,42 +506,30 @@ export default function Room() {
             if (shape === "StraightLine") {
               drawStraightLine(
                 paperCtx,
-                gestureRecognitionResult.landmarks[1][8].x *
-                  paperCanvasRef.current.width,
-                gestureRecognitionResult.landmarks[1][8].y *
-                  paperCanvasRef.current.height,
-                gestureRecognitionResult.landmarks[0][8].x *
-                  paperCanvasRef.current.width,
-                gestureRecognitionResult.landmarks[0][8].y *
-                  paperCanvasRef.current.height,
+                rightHandXPosition,
+                rightHandYPosition,
+                leftHandXPosition,
+                leftHandYPosition,
                 lineWidth,
                 isShapeReady
               );
             } else if (shape === "Rectangle") {
               drawRectangle(
                 paperCtx,
-                gestureRecognitionResult.landmarks[1][8].x *
-                  paperCanvasRef.current.width,
-                gestureRecognitionResult.landmarks[1][8].y *
-                  paperCanvasRef.current.height,
-                gestureRecognitionResult.landmarks[0][8].x *
-                  paperCanvasRef.current.width,
-                gestureRecognitionResult.landmarks[0][8].y *
-                  paperCanvasRef.current.height,
+                rightHandXPosition,
+                rightHandYPosition,
+                leftHandXPosition,
+                leftHandYPosition,
                 lineWidth,
                 isShapeReady
               );
             } else if (shape === "Circle") {
               drawCircle(
                 paperCtx,
-                gestureRecognitionResult.landmarks[1][8].x *
-                  paperCanvasRef.current.width,
-                gestureRecognitionResult.landmarks[1][8].y *
-                  paperCanvasRef.current.height,
-                gestureRecognitionResult.landmarks[0][8].x *
-                  paperCanvasRef.current.width,
-                gestureRecognitionResult.landmarks[0][8].y *
-                  paperCanvasRef.current.height,
+                rightHandXPosition,
+                rightHandYPosition,
+                leftHandXPosition,
+                leftHandYPosition,
                 isShapeReady
               );
             }
@@ -537,22 +537,14 @@ export default function Room() {
 
           dispatch(
             setLeftCursorPosition({
-              x:
-                gestureRecognitionResult.landmarks[0][8].x *
-                paperCanvasRef.current.width,
-              y:
-                gestureRecognitionResult.landmarks[0][8].y *
-                paperCanvasRef.current.height,
+              x: leftHandXPosition,
+              y: leftHandYPosition,
             })
           );
           dispatch(
             setRightCursorPosition({
-              x:
-                gestureRecognitionResult.landmarks[1][8].x *
-                paperCanvasRef.current.width,
-              y:
-                gestureRecognitionResult.landmarks[1][8].y *
-                paperCanvasRef.current.height,
+              x: rightHandXPosition,
+              y: rightHandYPosition,
             })
           );
 
@@ -564,10 +556,8 @@ export default function Room() {
           drawLine(
             gestureRecognitionResult,
             paperCtx,
-            gestureRecognitionResult.landmarks[1][8].x *
-              paperCanvasRef.current.width,
-            gestureRecognitionResult.landmarks[1][8].y *
-              paperCanvasRef.current.height,
+            rightHandXPosition,
+            rightHandYPosition,
             selectedColor,
             lineWidth,
             mode
@@ -672,8 +662,8 @@ export default function Room() {
       </LeftContainer>
       <RightContainer>
         <Paper></Paper>
-        <PaperCanvas ref={paperCanvasRef} width="960px" height="540px" />
-        <PaperCanvas ref={cursorCanvasRef} width="960px" height="540px" />
+        <PaperCanvas ref={paperCanvasRef} width="960px" height="960px" />
+        <PaperCanvas ref={cursorCanvasRef} width="960px" height="960px" />
       </RightContainer>
     </Wrapper>
   );
@@ -749,7 +739,7 @@ const VideoCanvas = styled.canvas`
 const Paper = styled.div`
   position: absolute;
   width: 960px;
-  height: 540px;
+  height: 960px;
   background-color: white;
   box-shadow: 10px 10px grey;
 `;
