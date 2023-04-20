@@ -28,6 +28,10 @@ import {
   drawRectangle,
   drawCircle,
 } from "../utils/drawShape";
+import {
+  setLeftCursorPosition,
+  setRightCursorPosition,
+} from "../features/history/cursorSlice";
 
 export default function Room() {
   const videoRef = useRef(null);
@@ -194,6 +198,17 @@ export default function Room() {
             })
           );
 
+          dispatch(
+            setRightCursorPosition({
+              x:
+                gestureRecognitionResult.landmarks[0][8].x *
+                paperCanvasRef.current.width,
+              y:
+                gestureRecognitionResult.landmarks[0][8].y *
+                paperCanvasRef.current.height,
+            })
+          );
+
           socket.emit("drawLine", roomName, {
             result: gestureRecognitionResult,
             x:
@@ -225,26 +240,37 @@ export default function Room() {
           if (
             gestureRecognitionResult.gestures[0][0].categoryName === "Thumb_Up"
           ) {
-            changePrevColor(setSelectedColor);
+            changePrevColor(setSelectedColor, dispatch);
           } else if (
             gestureRecognitionResult.gestures[0][0].categoryName ===
             "Thumb_Down"
           ) {
-            changeNextColor(setSelectedColor);
+            changeNextColor(setSelectedColor, dispatch);
           } else if (
             gestureRecognitionResult.gestures[0][0].categoryName === "Open_Palm"
           ) {
-            if (increasesLineWidth() && lineWidth < MAX_THICKNESS) {
+            if (increasesLineWidth(dispatch) && lineWidth < MAX_THICKNESS) {
               setLineWidth(lineWidth + THICKNESS);
             }
           } else if (
             gestureRecognitionResult.gestures[0][0].categoryName ===
             "Closed_Fist"
           ) {
-            if (decreasesLineWidth() && lineWidth > MIN_THICKNESS) {
+            if (decreasesLineWidth(dispatch) && lineWidth > MIN_THICKNESS) {
               setLineWidth(lineWidth - THICKNESS);
             }
           }
+
+          dispatch(
+            setLeftCursorPosition({
+              x:
+                gestureRecognitionResult.landmarks[0][8].x *
+                paperCanvasRef.current.width,
+              y:
+                gestureRecognitionResult.landmarks[0][8].y *
+                paperCanvasRef.current.height,
+            })
+          );
         } else if (
           gestureRecognitionResult.handednesses.length === 2 &&
           gestureRecognitionResult.handednesses[0][0].categoryName === "Left"
@@ -264,23 +290,23 @@ export default function Room() {
           if (
             gestureRecognitionResult.gestures[1][0].categoryName === "Thumb_Up"
           ) {
-            changePrevColor(setSelectedColor);
+            changePrevColor(setSelectedColor, dispatch);
           } else if (
             gestureRecognitionResult.gestures[1][0].categoryName ===
             "Thumb_Down"
           ) {
-            changeNextColor(setSelectedColor);
+            changeNextColor(setSelectedColor, dispatch);
           } else if (
             gestureRecognitionResult.gestures[1][0].categoryName === "Open_Palm"
           ) {
-            if (increasesLineWidth() && lineWidth < MAX_THICKNESS) {
+            if (increasesLineWidth(dispatch) && lineWidth < MAX_THICKNESS) {
               setLineWidth(lineWidth + THICKNESS);
             }
           } else if (
             gestureRecognitionResult.gestures[1][0].categoryName ===
             "Closed_Fist"
           ) {
-            if (decreasesLineWidth() && lineWidth > MIN_THICKNESS) {
+            if (decreasesLineWidth(dispatch) && lineWidth > MIN_THICKNESS) {
               setLineWidth(lineWidth - THICKNESS);
             }
           }
@@ -358,6 +384,27 @@ export default function Room() {
             }
           }
 
+          dispatch(
+            setLeftCursorPosition({
+              x:
+                gestureRecognitionResult.landmarks[1][8].x *
+                paperCanvasRef.current.width,
+              y:
+                gestureRecognitionResult.landmarks[1][8].y *
+                paperCanvasRef.current.height,
+            })
+          );
+          dispatch(
+            setRightCursorPosition({
+              x:
+                gestureRecognitionResult.landmarks[0][8].x *
+                paperCanvasRef.current.width,
+              y:
+                gestureRecognitionResult.landmarks[0][8].y *
+                paperCanvasRef.current.height,
+            })
+          );
+
           if (
             gestureRecognitionResult.gestures[1][0].categoryName === "ILoveYou"
           )
@@ -393,23 +440,23 @@ export default function Room() {
           if (
             gestureRecognitionResult.gestures[0][0].categoryName === "Thumb_Up"
           ) {
-            changePrevColor(setSelectedColor);
+            changePrevColor(setSelectedColor, dispatch);
           } else if (
             gestureRecognitionResult.gestures[0][0].categoryName ===
             "Thumb_Down"
           ) {
-            changeNextColor(setSelectedColor);
+            changeNextColor(setSelectedColor, dispatch);
           } else if (
             gestureRecognitionResult.gestures[0][0].categoryName === "Open_Palm"
           ) {
-            if (increasesLineWidth() && lineWidth < MAX_THICKNESS) {
+            if (increasesLineWidth(dispatch) && lineWidth < MAX_THICKNESS) {
               setLineWidth(lineWidth + THICKNESS);
             }
           } else if (
             gestureRecognitionResult.gestures[0][0].categoryName ===
             "Closed_Fist"
           ) {
-            if (increasesLineWidth() && lineWidth > MIN_THICKNESS) {
+            if (increasesLineWidth(dispatch) && lineWidth > MIN_THICKNESS) {
               setLineWidth(lineWidth - THICKNESS);
             }
           }
@@ -488,6 +535,27 @@ export default function Room() {
             }
           }
 
+          dispatch(
+            setLeftCursorPosition({
+              x:
+                gestureRecognitionResult.landmarks[0][8].x *
+                paperCanvasRef.current.width,
+              y:
+                gestureRecognitionResult.landmarks[0][8].y *
+                paperCanvasRef.current.height,
+            })
+          );
+          dispatch(
+            setRightCursorPosition({
+              x:
+                gestureRecognitionResult.landmarks[1][8].x *
+                paperCanvasRef.current.width,
+              y:
+                gestureRecognitionResult.landmarks[1][8].y *
+                paperCanvasRef.current.height,
+            })
+          );
+
           if (
             gestureRecognitionResult.gestures[0][0].categoryName === "ILoveYou"
           )
@@ -542,6 +610,7 @@ export default function Room() {
       setInitCanvas(data);
       setIsInitCanvas(true);
     });
+
     return () => {
       socket.off("initCanvas");
       setIsInitCanvas(false);

@@ -1,9 +1,12 @@
+import { setCount } from "../features/history/cursorSlice";
+
 let count = 0;
 let gesture = "";
 const color = ["red", "orange", "yellow", "blue", "green", "black"];
 let index = 0;
 
-export function changePrevColor(setColor) {
+export function changePrevColor(setColor, dispatch) {
+  dispatch(setCount(count * 5));
   if (gesture === "Thumb_Down") {
     count++;
   } else {
@@ -21,7 +24,8 @@ export function changePrevColor(setColor) {
   }
 }
 
-export function changeNextColor(setColor) {
+export function changeNextColor(setColor, dispatch) {
+  dispatch(setCount(count * 5));
   if (gesture === "Thumb_Up") {
     count++;
   } else {
@@ -39,7 +43,8 @@ export function changeNextColor(setColor) {
   }
 }
 
-export function decreasesLineWidth() {
+export function decreasesLineWidth(dispatch) {
+  dispatch(setCount(count * 10));
   if (gesture === "Closed_Fist") {
     count++;
   } else {
@@ -55,7 +60,8 @@ export function decreasesLineWidth() {
   return false;
 }
 
-export function increasesLineWidth() {
+export function increasesLineWidth(dispatch) {
+  dispatch(setCount(count * 10));
   if (gesture === "Open_Palm") {
     count++;
   } else {
