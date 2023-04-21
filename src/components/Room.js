@@ -248,12 +248,12 @@ export default function Room() {
           if (
             gestureRecognitionResult.gestures[0][0].categoryName === "Thumb_Up"
           ) {
-            changePrevColor(setSelectedColor, dispatch);
+            changeNextColor(setSelectedColor, dispatch);
           } else if (
             gestureRecognitionResult.gestures[0][0].categoryName ===
             "Thumb_Down"
           ) {
-            changeNextColor(setSelectedColor, dispatch);
+            changePrevColor(setSelectedColor, dispatch);
           } else if (
             gestureRecognitionResult.gestures[0][0].categoryName === "Open_Palm"
           ) {
@@ -309,12 +309,12 @@ export default function Room() {
           if (
             gestureRecognitionResult.gestures[1][0].categoryName === "Thumb_Up"
           ) {
-            changePrevColor(setSelectedColor, dispatch);
+            changeNextColor(setSelectedColor, dispatch);
           } else if (
             gestureRecognitionResult.gestures[1][0].categoryName ===
             "Thumb_Down"
           ) {
-            changeNextColor(setSelectedColor, dispatch);
+            changePrevColor(setSelectedColor, dispatch);
           } else if (
             gestureRecognitionResult.gestures[1][0].categoryName === "Open_Palm"
           ) {
@@ -464,12 +464,12 @@ export default function Room() {
           if (
             gestureRecognitionResult.gestures[0][0].categoryName === "Thumb_Up"
           ) {
-            changePrevColor(setSelectedColor, dispatch);
+            changeNextColor(setSelectedColor, dispatch);
           } else if (
             gestureRecognitionResult.gestures[0][0].categoryName ===
             "Thumb_Down"
           ) {
-            changeNextColor(setSelectedColor, dispatch);
+            changePrevColor(setSelectedColor, dispatch);
           } else if (
             gestureRecognitionResult.gestures[0][0].categoryName === "Open_Palm"
           ) {
@@ -782,12 +782,14 @@ export default function Room() {
       {isModalOpen && <Modal modalCloseHandler={modalCloseHandler} />}
       <LeftContainer>
         <ToolBox>
+          <Circle diameter="10" color="black" selectedColor={selectedColor} />
           <Circle diameter="10" color="red" selectedColor={selectedColor} />
           <Circle diameter="10" color="orange" selectedColor={selectedColor} />
           <Circle diameter="10" color="yellow" selectedColor={selectedColor} />
-          <Circle diameter="10" color="blue" selectedColor={selectedColor} />
           <Circle diameter="10" color="green" selectedColor={selectedColor} />
-          <Circle diameter="10" color="black" selectedColor={selectedColor} />
+          <Circle diameter="10" color="blue" selectedColor={selectedColor} />
+          <Circle diameter="10" color="navy" selectedColor={selectedColor} />
+          <Circle diameter="10" color="purple" selectedColor={selectedColor} />
         </ToolBox>
         <div>{mode}</div>
         <div>{lineWidth}</div>

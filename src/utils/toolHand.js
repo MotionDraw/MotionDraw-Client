@@ -2,11 +2,21 @@ import { setCount } from "../features/history/cursorSlice";
 
 let count = 0;
 let gesture = "";
-const color = ["red", "orange", "yellow", "blue", "green", "black"];
+const color = [
+  "black",
+  "red",
+  "orange",
+  "yellow",
+  "green",
+  "blue",
+  "navy",
+  "purple",
+];
 let index = 0;
 
 export function changePrevColor(setColor, dispatch) {
   dispatch(setCount(count * 5));
+
   if (gesture === "Thumb_Down") {
     count++;
   } else {
@@ -26,6 +36,7 @@ export function changePrevColor(setColor, dispatch) {
 
 export function changeNextColor(setColor, dispatch) {
   dispatch(setCount(count * 5));
+
   if (gesture === "Thumb_Up") {
     count++;
   } else {
