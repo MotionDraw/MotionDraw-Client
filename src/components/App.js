@@ -5,7 +5,9 @@ import { Routes, Route } from "react-router-dom";
 import { createGlobalStyle } from "styled-components";
 import { io } from "socket.io-client";
 
-export const socket = io(process.env.REACT_APP_SOCKET_URL);
+export const socket = io(process.env.REACT_APP_SOCKET_URL, {
+  maxHttpBufferSize: 10 * 1024 * 1024,
+});
 
 export default function App() {
   return (

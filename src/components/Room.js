@@ -397,10 +397,22 @@ export default function Room() {
               y: leftHandYPosition,
             })
           );
+
           dispatch(
             setRightCursorPosition({
               x: rightHandXPosition,
               y: rightHandYPosition,
+            })
+          );
+
+          dispatch(
+            pushHistory({
+              result: gestureRecognitionResult,
+              x: rightHandXPosition,
+              y: rightHandYPosition,
+              selectedColor: selectedColor,
+              lineWidth: lineWidth,
+              mode: mode,
             })
           );
 
@@ -541,10 +553,22 @@ export default function Room() {
               y: leftHandYPosition,
             })
           );
+
           dispatch(
             setRightCursorPosition({
               x: rightHandXPosition,
               y: rightHandYPosition,
+            })
+          );
+
+          dispatch(
+            pushHistory({
+              result: gestureRecognitionResult,
+              x: rightHandXPosition,
+              y: rightHandYPosition,
+              selectedColor: selectedColor,
+              lineWidth: lineWidth,
+              mode: mode,
             })
           );
 
@@ -609,17 +633,129 @@ export default function Room() {
 
   useEffect(() => {
     const ctx = paperCanvasRef.current.getContext("2d");
+    let state = "";
+
+    ctx.clearRect(
+      0,
+      0,
+      paperCanvasRef.current.width,
+      paperCanvasRef.current.height
+    );
 
     for (let i = 0; i < initCanvas.length; i += 1) {
-      drawLine(
-        initCanvas[i].result,
-        ctx,
-        initCanvas[i].x,
-        initCanvas[i].y,
-        initCanvas[i].selectedColor,
-        initCanvas[i].lineWidth,
-        initCanvas[i].mode
-      );
+      if (
+        initCanvas[i].result.handednesses.length === 1 &&
+        initCanvas[i].result.handednesses[0][0].categoryName === "Left"
+      ) {
+        drawLine(
+          initCanvas[i].result,
+          ctx,
+          initCanvas[i].x,
+          initCanvas[i].y,
+          initCanvas[i].selectedColor,
+          initCanvas[i].lineWidth,
+          initCanvas[i].mode
+        );
+      } else if (initCanvas[i].result.handednesses.length === 2) {
+        if (initCanvas[i].result.handednesses[0][0].categoryName === "Left") {
+          const leftHandXPosition =
+            initCanvas[i].result.landmarks[0][8].x *
+            paperCanvasRef.current.width;
+          const leftHandYPosition =
+            initCanvas[i].result.landmarks[0][8].y *
+            paperCanvasRef.current.height *
+            CANVAS_HEIGHT_OFFSET;
+          const rightHandXPosition =
+            initCanvas[i].result.landmarks[1][8].x *
+            paperCanvasRef.current.width;
+          const rightHandYPosition =
+            initCanvas[i].result.landmarks[1][8].y *
+            paperCanvasRef.current.height *
+            CANVAS_HEIGHT_OFFSET;
+
+          if (
+            initCanvas[i].result.gestures[0][0].categoryName === "ILoveYou" &&
+            initCanvas[i].result.gestures[1][0].categoryName === "ILoveYou"
+          ) {
+            state = "Straight";
+          } else if (
+            initCanvas[i].result.gestures[0][0].categoryName ===
+              "Pointing_Up" &&
+            initCanvas[i].result.gestures[1][0].categoryName === "ILoveYou"
+          ) {
+            state = "Circle";
+          } else if (
+            initCanvas[i].result.gestures[0][0].categoryName === "Victory" &&
+            initCanvas[i].result.gestures[1][0].categoryName === "ILoveYou"
+          ) {
+            state = "Rectangle";
+          }
+
+          if (
+            initCanvas[i].result.gestures[0][0].categoryName === "Open_Palm" &&
+            initCanvas[i].result.gestures[1][0].categoryName === "ILoveYou"
+          ) {
+            if (state === "Straight") {
+              ctx.beginPath();
+              ctx.lineTo(leftHandXPosition, leftHandYPosition);
+              ctx.lineTo(rightHandXPosition, rightHandYPosition);
+              ctx.stroke();
+
+              state = "";
+            } else if (state === "Rectangle") {
+              ctx.beginPath();
+              ctx.rect(
+                leftHandXPosition,
+                leftHandYPosition,
+                rightHandXPosition - leftHandXPosition,
+                rightHandYPosition - leftHandYPosition
+              );
+              ctx.stroke();
+
+              state = "";
+            } else if (state === "Circle") {
+              const radiusX = Math.abs(leftHandXPosition - rightHandXPosition);
+              const radiusY = Math.abs(leftHandYPosition - rightHandYPosition);
+              const radius =
+                Math.sqrt(Math.pow(radiusX, 2) + Math.pow(radiusY, 2)) / 2;
+
+              ctx.beginPath();
+              ctx.arc(
+                (leftHandXPosition + rightHandXPosition) / 2,
+                (leftHandYPosition + rightHandYPosition) / 2,
+                radius,
+                0,
+                2 * Math.PI
+              );
+              ctx.stroke();
+
+              state = "";
+            }
+
+            drawLine(
+              initCanvas[i].result,
+              ctx,
+              initCanvas[i].x,
+              initCanvas[i].y,
+              initCanvas[i].selectedColor,
+              initCanvas[i].lineWidth,
+              initCanvas[i].mode
+            );
+          } else if (
+            initCanvas[i].result.handednesses[0][0].categoryName === "Right"
+          ) {
+            drawLine(
+              initCanvas[i].result,
+              ctx,
+              initCanvas[i].x,
+              initCanvas[i].y,
+              initCanvas[i].selectedColor,
+              initCanvas[i].lineWidth,
+              initCanvas[i].mode
+            );
+          }
+        }
+      }
     }
   }, [initCanvas]);
 
@@ -662,8 +798,8 @@ export default function Room() {
       </LeftContainer>
       <RightContainer>
         <Paper></Paper>
-        <PaperCanvas ref={paperCanvasRef} width="960px" height="960px" />
-        <PaperCanvas ref={cursorCanvasRef} width="960px" height="960px" />
+        <PaperCanvas ref={paperCanvasRef} width="960px" height="800px" />
+        <PaperCanvas ref={cursorCanvasRef} width="960px" height="800px" />
       </RightContainer>
     </Wrapper>
   );
@@ -739,7 +875,7 @@ const VideoCanvas = styled.canvas`
 const Paper = styled.div`
   position: absolute;
   width: 960px;
-  height: 960px;
+  height: 800px;
   background-color: white;
   box-shadow: 10px 10px grey;
 `;

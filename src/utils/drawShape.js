@@ -1,4 +1,4 @@
-let prevReady;
+let prevReady = false;
 
 export function drawStraightLine(ctx, x1, y1, x2, y2, lineWidth, ready) {
   if (prevReady === false && ready === true) {
