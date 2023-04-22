@@ -18,6 +18,10 @@ import {
   CANVAS_HEIGHT_OFFSET,
   MAX_THICKNESS,
   MIN_THICKNESS,
+  PAPER_CANVAS_HEIGHT,
+  PAPER_CANVAS_HEIGHT_PX,
+  PAPER_CANVAS_WIDTH,
+  PAPER_CANVAS_WIDTH_PX,
   THICKNESS,
 } from "../constants/canvasConfig";
 import { socket } from "./App";
@@ -151,6 +155,7 @@ export default function Room() {
             gestureRecognitionResult.landmarks[0][8].y *
             paperCanvasRef.current.height *
             CANVAS_HEIGHT_OFFSET;
+
           for (const landmarks of gestureRecognitionResult.landmarks) {
             drawConnectors(videoCtx, landmarks, HAND_CONNECTIONS, {
               color: "#00FF00",
@@ -781,33 +786,57 @@ export default function Room() {
       <ShowModalButton onClick={modalOpenHandler}>?</ShowModalButton>
       {isModalOpen && <Modal modalCloseHandler={modalCloseHandler} />}
       <LeftContainer>
-        <ToolBox>
-          <Circle diameter="10" color="black" selectedColor={selectedColor} />
-          <Circle diameter="10" color="red" selectedColor={selectedColor} />
-          <Circle diameter="10" color="orange" selectedColor={selectedColor} />
-          <Circle diameter="10" color="yellow" selectedColor={selectedColor} />
-          <Circle diameter="10" color="green" selectedColor={selectedColor} />
-          <Circle diameter="10" color="blue" selectedColor={selectedColor} />
-          <Circle diameter="10" color="navy" selectedColor={selectedColor} />
-          <Circle diameter="10" color="purple" selectedColor={selectedColor} />
-        </ToolBox>
-        <div>{mode}</div>
-        <div>{lineWidth}</div>
-        <div position="relative">
+        <div style={{ fontSize: "8rem", fontWeight: "800" }}>{mode}</div>
+        <LineWidthContainer>
+          <div>Line : {lineWidth}px</div>
+          <LineWidthDisplay lineWidth={lineWidth} color={selectedColor} />
+        </LineWidthContainer>
+        <VideoContainer>
           <Video ref={videoRef} autoPlay />
           <VideoCanvas ref={videoCanvasRef} />
-        </div>
+        </VideoContainer>
       </LeftContainer>
       <RightContainer>
-        <Paper></Paper>
-        <PaperCanvas ref={paperCanvasRef} width="960px" height="800px" />
-        <PaperCanvas ref={cursorCanvasRef} width="960px" height="800px" />
+        <PaperContainer>
+          <Paper width={PAPER_CANVAS_WIDTH_PX} height={PAPER_CANVAS_HEIGHT_PX}>
+            <ToolBox>
+              <Circle color="black" selectedColor={selectedColor} />
+              <Circle color="red" selectedColor={selectedColor} />
+              <Circle color="orange" selectedColor={selectedColor} />
+              <Circle color="yellow" selectedColor={selectedColor} />
+              <Circle color="green" selectedColor={selectedColor} />
+              <Circle color="blue" selectedColor={selectedColor} />
+              <Circle color="navy" selectedColor={selectedColor} />
+              <Circle color="purple" selectedColor={selectedColor} />
+            </ToolBox>
+          </Paper>
+          <PaperCanvas
+            ref={paperCanvasRef}
+            width={PAPER_CANVAS_WIDTH_PX}
+            height={PAPER_CANVAS_HEIGHT_PX}
+          />
+          <PaperCanvas
+            ref={cursorCanvasRef}
+            width={PAPER_CANVAS_WIDTH}
+            height={PAPER_CANVAS_HEIGHT_PX}
+          />
+        </PaperContainer>
       </RightContainer>
     </Wrapper>
   );
 }
 
+const fadeIn = keyframes`
+  from {
+    opacity: 0.3;
+  }
+  to {
+    opacity: 1;
+  }
+`;
+
 const Wrapper = styled.div`
+  padding-top: 50px;
   display: flex;
   height: 100vh;
   width: 100vw;
@@ -816,97 +845,113 @@ const Wrapper = styled.div`
   overflow: hidden;
 `;
 
-const bounce = keyframes`
-  0% {
-    transform: translate(0);
-  }
-  100% {
-    transform: translateY(-20px);
-  }
+const LineWidthContainer = styled.div`
+  display: flex;
+`;
+
+const VideoContainer = styled.div`
+  position: relative;
+`;
+
+const PaperContainer = styled.div`
+  position: absolute;
 `;
 
 const Circle = styled.div`
-  margin: 10px;
-  width: ${(props) => `${props.diameter}vh`};
-  height: ${(props) => `${props.diameter}vh`};
+  margin: 5px;
+  width: 55px;
+  height: 55px;
   background-color: ${(props) => props.color};
   border-radius: 50%;
+  opacity: 0.3;
   animation: ${(props) =>
     props.selectedColor === props.color &&
     css`
-      ${bounce} 0.3s linear 0s infinite alternate
+      ${fadeIn} 0.5s linear 0s forwards
     `};
   border: 5px solid rgb(255, 255, 255);
 `;
 
+const LineWidthDisplay = styled.div`
+  width: ${(props) => `${props.lineWidth}px`};
+  height: 100px;
+  background: ${(props) => props.color};
+`;
+
 const LeftContainer = styled.div`
   display: flex;
-  align-items: center;
   flex-direction: column;
+  text-align: center;
+  align-items: center;
+  font-size: 5rem;
+  font-weight: 800;
   width: 30vw;
-  height: 100vh;
+  height: 800px;
+  color: rgb(242, 65, 57);
+
+  div {
+    margin-bottom: 2.5rem;
+  }
 `;
 
 const RightContainer = styled.div`
   position: relative;
   width: 70vw;
   height: 100vh;
-  padding: 50px;
+  padding: 0 50px;
 `;
 
 const Video = styled.video`
   position: absolute;
-  left: 0;
-  right: 0;
+  left: 50%;
   z-index: 9;
   width: 320px;
   height: 240px;
-  transform: rotateY(180deg);
+  transform: translateX(-50%) rotateY(180deg);
 `;
 
 const VideoCanvas = styled.canvas`
   position: absolute;
-  left: 0;
-  right: 0;
+  left: 50%;
   z-index: 9;
   width: 320px;
   height: 240px;
-  transform: rotateY(180deg);
+  transform: translateX(-50%) rotateY(180deg);
 `;
 
 const Paper = styled.div`
   position: absolute;
-  width: 960px;
-  height: 800px;
+  width: ${(props) => props.width};
+  height: ${(props) => props.height};
   background-color: white;
   box-shadow: 10px 10px grey;
 `;
 
 const PaperCanvas = styled.canvas`
   position: absolute;
-  top: 50;
-  left: 50;
   z-index: 9;
   transform: rotateY(180deg);
 `;
 
 const ToolBox = styled.div`
+  position: absolute;
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
+  right: 10px;
+  z-index: 10;
 `;
 
 const ShowModalButton = styled.button`
   position: absolute;
   height: 50px;
   width: 50px;
-
   font-size: 20px;
   right: 10px;
   bottom: 10px;
   border: none;
-
   z-index: 999;
-
   border-radius: 50%;
+  color: rgb(255, 255, 255);
+  background-color: rgb(242, 65, 57);
   cursor: pointer;
 `;

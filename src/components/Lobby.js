@@ -64,7 +64,9 @@ export default function Lobby() {
           })}
         </RoomsLists>
       </RoomsContainer>
-      <CreateRoomButton onClick={onCreateRoom}>방 만들기</CreateRoomButton>
+      <ButtonContainer>
+        <CreateRoomButton onClick={onCreateRoom}>방 만들기</CreateRoomButton>
+      </ButtonContainer>
     </Wrapper>
   );
 }
@@ -88,14 +90,23 @@ const Circle = styled.div`
 
 const RoomsContainer = styled.div`
   position: relative;
-  width: 75vw;
+  width: 70vw;
   display: flex;
   justify-content: flex-start;
   flex-direction: column;
   color: gray;
 `;
 
+const ButtonContainer = styled.div`
+  position: relative;
+  height: 100vh;
+  width: 25vw;
+  display: flex;
+  flex-direction: column;
+`;
+
 const RoomsLists = styled.div`
+  height: 85vh;
   display: flex;
   align-items: center;
   flex-direction: column;
@@ -118,6 +129,8 @@ const Room = styled.div`
 `;
 
 const CreateRoomButton = styled.button`
+  position: absolute;
+  bottom: 50px;
   display: flex;
   z-index: 1;
   justify-content: center;

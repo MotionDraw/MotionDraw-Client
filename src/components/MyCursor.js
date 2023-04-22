@@ -13,14 +13,15 @@ export default function MyCursor({ canvas }) {
           canvas.current.width -
             cursor.rightHand.x +
             canvas.current.offsetLeft +
-            canvas.current.offsetParent.offsetLeft +
-            5
+            canvas.current.offsetParent.offsetParent.offsetLeft +
+            50
         }
         top={
           canvas.current &&
           cursor.rightHand.y +
             canvas.current.offsetTop +
             canvas.current.offsetParent.offsetTop +
+            canvas.current.offsetParent.offsetParent.offsetTop +
             5
         }
       >
@@ -32,7 +33,9 @@ export default function MyCursor({ canvas }) {
           canvas.current.width -
             cursor.leftHand.x +
             canvas.current.offsetLeft +
-            canvas.current.offsetParent.offsetLeft +
+            canvas.current.offsetParent.offsetParent.offsetLeft +
+            50 -
+            80 +
             5
         }
         top={
@@ -40,6 +43,7 @@ export default function MyCursor({ canvas }) {
           cursor.leftHand.y +
             canvas.current.offsetTop +
             canvas.current.offsetParent.offsetTop +
+            canvas.current.offsetParent.offsetParent.offsetTop +
             5
         }
       >
@@ -58,7 +62,7 @@ const RightCursor = styled.div`
 
   left: ${(props) => `${props.left}px`};
   top: ${(props) => `${props.top}px`};
-  z-index: 999;
+  z-index: 20;
 
   text-align: center;
   font-size: 1rem;
@@ -68,7 +72,8 @@ const RightCursor = styled.div`
   border-bottom-right-radius: 20px;
   border-top-right-radius: 20px;
 
-  background: rgba(0, 0, 0, 0.2);
+  color: rgb(255, 255, 255);
+  background-color: rgba(242, 65, 57, 0.5);
 `;
 
 const LeftCursor = styled.div`
@@ -79,7 +84,7 @@ const LeftCursor = styled.div`
 
   left: ${(props) => `${props.left}px`};
   top: ${(props) => `${props.top}px`};
-  z-index: 999;
+  z-index: 20;
 
   text-align: center;
   font-size: 1rem;
@@ -90,7 +95,8 @@ const LeftCursor = styled.div`
   border-top-left-radius: 20px;
   border-color: black black black black;
 
-  background: rgba(0, 0, 0, 0.2);
+  color: rgb(255, 255, 255);
+  background-color: rgba(242, 65, 57, 0.5);
 `;
 
 const ProgressBar = styled.div`
@@ -106,5 +112,5 @@ const ProgressBar = styled.div`
   border-bottom-left-radius: 20px;
   border-bottom-right-radius: 20px;
 
-  background: blue;
+  background: rgba(242, 65, 57);
 `;
