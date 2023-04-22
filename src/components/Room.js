@@ -18,9 +18,7 @@ import {
   CANVAS_HEIGHT_OFFSET,
   MAX_THICKNESS,
   MIN_THICKNESS,
-  PAPER_CANVAS_HEIGHT,
   PAPER_CANVAS_HEIGHT_PX,
-  PAPER_CANVAS_WIDTH,
   PAPER_CANVAS_WIDTH_PX,
   THICKNESS,
 } from "../constants/canvasConfig";
@@ -37,6 +35,7 @@ import {
   setLeftCursorPosition,
   setRightCursorPosition,
 } from "../features/history/cursorSlice";
+import OthersCursor from "./OthersCursor";
 
 export default function Room() {
   const videoRef = useRef(null);
@@ -607,7 +606,6 @@ export default function Room() {
 
   useEffect(() => {
     if (isInitCanvas) {
-      socket.off("requestData");
       return;
     }
     socket.emit("sendHistory", roomName);
@@ -782,7 +780,8 @@ export default function Room() {
 
   return (
     <Wrapper>
-      <MyCursor canvas={paperCanvasRef} />
+      <MyCursor roomName={roomName} canvas={paperCanvasRef} />
+      <OthersCursor canvas={paperCanvasRef} />
       <ShowModalButton onClick={modalOpenHandler}>?</ShowModalButton>
       {isModalOpen && <Modal modalCloseHandler={modalCloseHandler} />}
       <LeftContainer>
@@ -817,7 +816,7 @@ export default function Room() {
           />
           <PaperCanvas
             ref={cursorCanvasRef}
-            width={PAPER_CANVAS_WIDTH}
+            width={PAPER_CANVAS_WIDTH_PX}
             height={PAPER_CANVAS_HEIGHT_PX}
           />
         </PaperContainer>
