@@ -209,6 +209,7 @@ export default function Room() {
               selectedColor: selectedColor,
               lineWidth: lineWidth,
               mode: mode,
+              socketId: socket.id,
             })
           );
 
@@ -226,6 +227,7 @@ export default function Room() {
             selectedColor: selectedColor,
             lineWidth: lineWidth,
             mode: mode,
+            socketId: socket.id,
           });
 
           drawLine(
@@ -235,7 +237,8 @@ export default function Room() {
             rightHandYPosition,
             selectedColor,
             lineWidth,
-            mode
+            mode,
+            socket.id
           );
         } else if (
           gestureRecognitionResult.handednesses.length === 1 &&
@@ -417,8 +420,19 @@ export default function Room() {
               selectedColor: selectedColor,
               lineWidth: lineWidth,
               mode: mode,
+              socketId: socket.id,
             })
           );
+
+          socket.emit("drawLine", roomName, {
+            result: gestureRecognitionResult,
+            x: leftHandXPosition,
+            y: leftHandYPosition,
+            selectedColor: selectedColor,
+            lineWidth: lineWidth,
+            mode: mode,
+            socketId: socket.id,
+          });
 
           if (
             gestureRecognitionResult.gestures[1][0].categoryName === "ILoveYou"
@@ -432,7 +446,8 @@ export default function Room() {
             rightHandYPosition,
             selectedColor,
             lineWidth,
-            mode
+            mode,
+            socket.id
           );
         } else if (
           gestureRecognitionResult.handednesses.length === 2 &&
@@ -573,8 +588,19 @@ export default function Room() {
               selectedColor: selectedColor,
               lineWidth: lineWidth,
               mode: mode,
+              socketId: socket.id,
             })
           );
+
+          socket.emit("drawLine", roomName, {
+            result: gestureRecognitionResult,
+            x: rightHandXPosition,
+            y: rightHandYPosition,
+            selectedColor: selectedColor,
+            lineWidth: lineWidth,
+            mode: mode,
+            socketId: socket.id,
+          });
 
           if (
             gestureRecognitionResult.gestures[0][0].categoryName === "ILoveYou"
@@ -588,7 +614,8 @@ export default function Room() {
             rightHandYPosition,
             selectedColor,
             lineWidth,
-            mode
+            mode,
+            socket.id
           );
         }
         videoCtx.restore();
@@ -657,7 +684,8 @@ export default function Room() {
           initCanvas[i].y,
           initCanvas[i].selectedColor,
           initCanvas[i].lineWidth,
-          initCanvas[i].mode
+          initCanvas[i].mode,
+          initCanvas[i].socketId
         );
       } else if (initCanvas[i].result.handednesses.length === 2) {
         if (initCanvas[i].result.handednesses[0][0].categoryName === "Left") {
@@ -742,7 +770,8 @@ export default function Room() {
               initCanvas[i].y,
               initCanvas[i].selectedColor,
               initCanvas[i].lineWidth,
-              initCanvas[i].mode
+              initCanvas[i].mode,
+              initCanvas[i].socketId
             );
           } else if (
             initCanvas[i].result.handednesses[0][0].categoryName === "Right"
@@ -754,7 +783,109 @@ export default function Room() {
               initCanvas[i].y,
               initCanvas[i].selectedColor,
               initCanvas[i].lineWidth,
-              initCanvas[i].mode
+              initCanvas[i].mode,
+              initCanvas[i].socketId
+            );
+          }
+        } else if (
+          initCanvas[i].result.handednesses[0][0].categoryName === "Right"
+        ) {
+          const leftHandXPosition =
+            initCanvas[i].result.landmarks[1][8].x *
+            paperCanvasRef.current.width;
+          const leftHandYPosition =
+            initCanvas[i].result.landmarks[1][8].y *
+            paperCanvasRef.current.height *
+            CANVAS_HEIGHT_OFFSET;
+          const rightHandXPosition =
+            initCanvas[i].result.landmarks[0][8].x *
+            paperCanvasRef.current.width;
+          const rightHandYPosition =
+            initCanvas[i].result.landmarks[0][8].y *
+            paperCanvasRef.current.height *
+            CANVAS_HEIGHT_OFFSET;
+
+          if (
+            initCanvas[i].result.gestures[1][0].categoryName === "ILoveYou" &&
+            initCanvas[i].result.gestures[0][0].categoryName === "ILoveYou"
+          ) {
+            state = "Straight";
+          } else if (
+            initCanvas[i].result.gestures[1][0].categoryName ===
+              "Pointing_Up" &&
+            initCanvas[i].result.gestures[0][0].categoryName === "ILoveYou"
+          ) {
+            state = "Circle";
+          } else if (
+            initCanvas[i].result.gestures[1][0].categoryName === "Victory" &&
+            initCanvas[i].result.gestures[0][0].categoryName === "ILoveYou"
+          ) {
+            state = "Rectangle";
+          }
+
+          if (
+            initCanvas[i].result.gestures[1][0].categoryName === "Open_Palm" &&
+            initCanvas[i].result.gestures[0][0].categoryName === "ILoveYou"
+          ) {
+            if (state === "Straight") {
+              ctx.beginPath();
+              ctx.lineTo(leftHandXPosition, leftHandYPosition);
+              ctx.lineTo(rightHandXPosition, rightHandYPosition);
+              ctx.stroke();
+
+              state = "";
+            } else if (state === "Rectangle") {
+              ctx.beginPath();
+              ctx.rect(
+                leftHandXPosition,
+                leftHandYPosition,
+                rightHandXPosition - leftHandXPosition,
+                rightHandYPosition - leftHandYPosition
+              );
+              ctx.stroke();
+
+              state = "";
+            } else if (state === "Circle") {
+              const radiusX = Math.abs(leftHandXPosition - rightHandXPosition);
+              const radiusY = Math.abs(leftHandYPosition - rightHandYPosition);
+              const radius =
+                Math.sqrt(Math.pow(radiusX, 2) + Math.pow(radiusY, 2)) / 2;
+
+              ctx.beginPath();
+              ctx.arc(
+                (leftHandXPosition + rightHandXPosition) / 2,
+                (leftHandYPosition + rightHandYPosition) / 2,
+                radius,
+                0,
+                2 * Math.PI
+              );
+              ctx.stroke();
+
+              state = "";
+            }
+
+            drawLine(
+              initCanvas[i].result,
+              ctx,
+              initCanvas[i].x,
+              initCanvas[i].y,
+              initCanvas[i].selectedColor,
+              initCanvas[i].lineWidth,
+              initCanvas[i].mode,
+              initCanvas[i].socketId
+            );
+          } else if (
+            initCanvas[i].result.handednesses[0][0].categoryName === "Right"
+          ) {
+            drawLine(
+              initCanvas[i].result,
+              ctx,
+              initCanvas[i].x,
+              initCanvas[i].y,
+              initCanvas[i].selectedColor,
+              initCanvas[i].lineWidth,
+              initCanvas[i].mode,
+              initCanvas[i].socketId
             );
           }
         }
@@ -764,19 +895,222 @@ export default function Room() {
 
   useEffect(() => {
     const ctx = paperCanvasRef.current.getContext("2d");
+    let state = "";
 
     socket.on("draw", (data) => {
-      drawLine(
-        data.result,
-        ctx,
-        data.x,
-        data.y,
-        data.selectedColor,
-        data.lineWidth,
-        data.mode
-      );
+      dispatch(pushHistory(data));
+      if (
+        data.result.handednesses.length === 1 &&
+        data.result.handednesses[0][0].categoryName === "Left"
+      ) {
+        console.log(data.socketId);
+        drawLine(
+          data.result,
+          ctx,
+          data.x,
+          data.y,
+          data.selectedColor,
+          data.lineWidth,
+          data.mode,
+          data.socketId
+        );
+      } else if (data.result.handednesses.length === 2) {
+        if (data.result.handednesses[0][0].categoryName === "Left") {
+          const leftHandXPosition =
+            data.result.landmarks[0][8].x * paperCanvasRef.current.width;
+          const leftHandYPosition =
+            data.result.landmarks[0][8].y *
+            paperCanvasRef.current.height *
+            CANVAS_HEIGHT_OFFSET;
+          const rightHandXPosition =
+            data.result.landmarks[1][8].x * paperCanvasRef.current.width;
+          const rightHandYPosition =
+            data.result.landmarks[1][8].y *
+            paperCanvasRef.current.height *
+            CANVAS_HEIGHT_OFFSET;
+
+          if (
+            data.result.gestures[0][0].categoryName === "ILoveYou" &&
+            data.result.gestures[1][0].categoryName === "ILoveYou"
+          ) {
+            state = "Straight";
+          } else if (
+            data.result.gestures[0][0].categoryName === "Pointing_Up" &&
+            data.result.gestures[1][0].categoryName === "ILoveYou"
+          ) {
+            state = "Circle";
+          } else if (
+            data.result.gestures[0][0].categoryName === "Victory" &&
+            data.result.gestures[1][0].categoryName === "ILoveYou"
+          ) {
+            state = "Rectangle";
+          }
+
+          if (
+            data.result.gestures[0][0].categoryName === "Open_Palm" &&
+            data.result.gestures[1][0].categoryName === "ILoveYou"
+          ) {
+            if (state === "Straight") {
+              ctx.beginPath();
+              ctx.lineTo(leftHandXPosition, leftHandYPosition);
+              ctx.lineTo(rightHandXPosition, rightHandYPosition);
+              ctx.stroke();
+
+              state = "";
+            } else if (state === "Rectangle") {
+              ctx.beginPath();
+              ctx.rect(
+                leftHandXPosition,
+                leftHandYPosition,
+                rightHandXPosition - leftHandXPosition,
+                rightHandYPosition - leftHandYPosition
+              );
+              ctx.stroke();
+
+              state = "";
+            } else if (state === "Circle") {
+              const radiusX = Math.abs(leftHandXPosition - rightHandXPosition);
+              const radiusY = Math.abs(leftHandYPosition - rightHandYPosition);
+              const radius =
+                Math.sqrt(Math.pow(radiusX, 2) + Math.pow(radiusY, 2)) / 2;
+
+              ctx.beginPath();
+              ctx.arc(
+                (leftHandXPosition + rightHandXPosition) / 2,
+                (leftHandYPosition + rightHandYPosition) / 2,
+                radius,
+                0,
+                2 * Math.PI
+              );
+              ctx.stroke();
+
+              state = "";
+            }
+
+            drawLine(
+              data.result,
+              ctx,
+              data.x,
+              data.y,
+              data.selectedColor,
+              data.lineWidth,
+              data.mode,
+              data.socketId
+            );
+          } else if (data.result.handednesses[0][0].categoryName === "Right") {
+            drawLine(
+              data.result,
+              ctx,
+              data.x,
+              data.y,
+              data.selectedColor,
+              data.lineWidth,
+              data.mode,
+              data.socketId
+            );
+          }
+        } else if (data.result.handednesses[0][0].categoryName === "Right") {
+          const leftHandXPosition =
+            data.result.landmarks[1][8].x * paperCanvasRef.current.width;
+          const leftHandYPosition =
+            data.result.landmarks[1][8].y *
+            paperCanvasRef.current.height *
+            CANVAS_HEIGHT_OFFSET;
+          const rightHandXPosition =
+            data.result.landmarks[0][8].x * paperCanvasRef.current.width;
+          const rightHandYPosition =
+            data.result.landmarks[0][8].y *
+            paperCanvasRef.current.height *
+            CANVAS_HEIGHT_OFFSET;
+
+          if (
+            data.result.gestures[1][0].categoryName === "ILoveYou" &&
+            data.result.gestures[0][0].categoryName === "ILoveYou"
+          ) {
+            state = "Straight";
+          } else if (
+            data.result.gestures[1][0].categoryName === "Pointing_Up" &&
+            data.result.gestures[0][0].categoryName === "ILoveYou"
+          ) {
+            state = "Circle";
+          } else if (
+            data.result.gestures[1][0].categoryName === "Victory" &&
+            data.result.gestures[0][0].categoryName === "ILoveYou"
+          ) {
+            state = "Rectangle";
+          }
+
+          if (
+            data.result.gestures[1][0].categoryName === "Open_Palm" &&
+            data.result.gestures[0][0].categoryName === "ILoveYou"
+          ) {
+            if (state === "Straight") {
+              ctx.beginPath();
+              ctx.lineTo(leftHandXPosition, leftHandYPosition);
+              ctx.lineTo(rightHandXPosition, rightHandYPosition);
+              ctx.stroke();
+
+              state = "";
+            } else if (state === "Rectangle") {
+              ctx.beginPath();
+              ctx.rect(
+                leftHandXPosition,
+                leftHandYPosition,
+                rightHandXPosition - leftHandXPosition,
+                rightHandYPosition - leftHandYPosition
+              );
+              ctx.stroke();
+
+              state = "";
+            } else if (state === "Circle") {
+              const radiusX = Math.abs(leftHandXPosition - rightHandXPosition);
+              const radiusY = Math.abs(leftHandYPosition - rightHandYPosition);
+              const radius =
+                Math.sqrt(Math.pow(radiusX, 2) + Math.pow(radiusY, 2)) / 2;
+
+              ctx.beginPath();
+              ctx.arc(
+                (leftHandXPosition + rightHandXPosition) / 2,
+                (leftHandYPosition + rightHandYPosition) / 2,
+                radius,
+                0,
+                2 * Math.PI
+              );
+              ctx.stroke();
+
+              state = "";
+            }
+
+            drawLine(
+              data.result,
+              ctx,
+              data.x,
+              data.y,
+              data.selectedColor,
+              data.lineWidth,
+              data.mode,
+              data.socketId
+            );
+          } else if (data.result.handednesses[0][0].categoryName === "Right") {
+            drawLine(
+              data.result,
+              ctx,
+              data.x,
+              data.y,
+              data.selectedColor,
+              data.lineWidth,
+              data.mode,
+              data.socketId
+            );
+          }
+        }
+      }
     });
-  }, []);
+
+    return () => {
+      socket.off("draw");
+    };
+  }, [paperCanvasRef]);
 
   return (
     <Wrapper>

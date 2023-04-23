@@ -5,9 +5,9 @@ import styled from "styled-components";
 import { socket } from "./App";
 
 export default function MyCursor({ roomName, canvas }) {
+  const [invisibleCount, setInvisibleCount] = useState(5);
   const cursor = useSelector((state) => state.cursor);
   const count = useSelector((state) => state.cursor.count);
-  const [invisibleCount, setInvisibleCount] = useState(5);
 
   useEffect(() => {
     socket.emit("cursorPosition", roomName, socket.id, cursor);
