@@ -2,7 +2,7 @@ import { setCount } from "../features/history/cursorSlice";
 
 let count = 0;
 let gesture = "";
-const color = [
+const colorArr = [
   "black",
   "red",
   "orange",
@@ -25,11 +25,11 @@ export function changePrevColor(setColor, dispatch) {
   }
 
   if (count > 20) {
-    setColor(color[index]);
+    setColor(colorArr[index]);
     count = 0;
     index--;
     if (index < 0) {
-      index = color.length - 1;
+      index = colorArr.length - 1;
     }
   }
 }
@@ -45,10 +45,10 @@ export function changeNextColor(setColor, dispatch) {
   }
 
   if (count > 20) {
-    setColor(color[index]);
+    setColor(colorArr[index]);
     count = 0;
     index++;
-    if (index > color.length - 1) {
+    if (index > colorArr.length - 1) {
       index = 0;
     }
   }
@@ -86,4 +86,8 @@ export function increasesLineWidth(dispatch) {
   }
 
   return false;
+}
+
+export function changeColor(color) {
+  index = colorArr.findIndex((item) => item === color);
 }

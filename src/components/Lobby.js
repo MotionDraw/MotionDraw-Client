@@ -7,6 +7,7 @@ import { initHistory } from "../features/history/historySlice";
 
 export default function Lobby() {
   const [rooms, setRooms] = useState([]);
+  const [isRefresh, setRefresh] = useState(false);
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -31,19 +32,34 @@ export default function Lobby() {
     });
   }
 
+  function roomListHandler(rooms) {
+    setRooms(rooms);
+  }
+
+  function refreshHandler() {
+    setRefresh(!isRefresh);
+  }
+
   useEffect(() => {
     dispatch(initHistory());
   }, [dispatch]);
 
   useEffect(() => {
-    function roomListHandler(rooms) {
-      setRooms(rooms);
-    }
-
     socket.emit("roomList", roomListHandler);
 
     return () => {
       socket.off("roomList", roomListHandler);
+    };
+  }, [isRefresh]);
+
+  useEffect(() => {
+    const id = setInterval(() => {
+      socket.emit("roomList", roomListHandler);
+    }, 5000);
+
+    return () => {
+      socket.off("roomList", roomListHandler);
+      clearInterval(id);
     };
   }, []);
 
@@ -54,6 +70,7 @@ export default function Lobby() {
       <Circle top="40vh" left="70vw" diameter="90" color="yellow" />
       <RoomsContainer>
         <RoomsLists>
+          <div style={{ color: "white" }}>Rooms</div>
           {Object.values(rooms).map((element, index) => {
             return (
               <Room key={index} onClick={() => onClickRoom(element.roomName)}>
@@ -65,7 +82,8 @@ export default function Lobby() {
         </RoomsLists>
       </RoomsContainer>
       <ButtonContainer>
-        <CreateRoomButton onClick={onCreateRoom}>방 만들기</CreateRoomButton>
+        <StyledButton onClick={onCreateRoom}>방 만들기</StyledButton>
+        <StyledButton onClick={refreshHandler}>새로고침</StyledButton>
       </ButtonContainer>
     </Wrapper>
   );
@@ -102,7 +120,8 @@ const ButtonContainer = styled.div`
   height: 100vh;
   width: 25vw;
   display: flex;
-  flex-direction: column;
+  flex-direction: column-reverse;
+  align-items: flex-end;
 `;
 
 const RoomsLists = styled.div`
@@ -128,15 +147,12 @@ const Room = styled.div`
   cursor: pointer;
 `;
 
-const CreateRoomButton = styled.button`
-  position: absolute;
-  bottom: 50px;
-  display: flex;
+const StyledButton = styled.button`
+  position: relative;
   z-index: 1;
-  justify-content: center;
-  align-items: center;
-  width: 500px;
+  width: 100%;
   height: 150px;
+  margin-bottom: 30px;
   border-radius: 10px;
   border: none;
   background: rgb(251, 188, 4);

@@ -9,6 +9,7 @@ import modelAssetPath from "../assets/gesture_recognizer.task";
 import { drawCursor } from "../utils/drawCursor";
 import { useParams } from "react-router-dom";
 import {
+  changeColor,
   changeNextColor,
   changePrevColor,
   decreasesLineWidth,
@@ -65,6 +66,11 @@ export default function Room() {
 
   function modalCloseHandler() {
     setIsModalOpen(false);
+  }
+
+  function changeColorHandler(color) {
+    changeColor(color);
+    setSelectedColor(color);
   }
 
   useEffect(() => {
@@ -687,7 +693,16 @@ export default function Room() {
     return () => {
       clearInterval(id);
     };
-  }, [gestureRecognizer, selectedColor, mode, lineWidth, isShapeReady]);
+  }, [
+    gestureRecognizer,
+    selectedColor,
+    mode,
+    lineWidth,
+    isShapeReady,
+    roomName,
+    shape,
+    dispatch,
+  ]);
 
   useEffect(() => {
     if (isInitCanvas) {
@@ -1167,7 +1182,7 @@ export default function Room() {
     return () => {
       socket.off("draw");
     };
-  }, [paperCanvasRef]);
+  }, [paperCanvasRef, dispatch]);
 
   return (
     <Wrapper>
@@ -1176,10 +1191,32 @@ export default function Room() {
       <ShowModalButton onClick={modalOpenHandler}>?</ShowModalButton>
       {isModalOpen && <Modal modalCloseHandler={modalCloseHandler} />}
       <LeftContainer>
-        <div style={{ fontSize: "8rem", fontWeight: "800" }}>{mode}</div>
+        <div style={{ fontSize: "7rem", fontWeight: "800" }}>{mode}</div>
         <LineWidthContainer>
           <div>Line : {lineWidth}px</div>
-          <LineWidthDisplay lineWidth={lineWidth} color={selectedColor} />
+          <LineWidthSlider
+            style={{ backgroundColor: "orange" }}
+            type="range"
+            min={MIN_THICKNESS}
+            max={MAX_THICKNESS}
+            color="gray"
+            step={1}
+            value={lineWidth}
+            onChange={(e) => {
+              setLineWidth(e.target.valueAsNumber);
+            }}
+            list="markers"
+          />
+          <DataList id="markers">
+            <option value="1" label="1"></option>
+            <option value="2" label="2"></option>
+            <option value="3" label="3"></option>
+            <option value="4" label="4"></option>
+            <option value="5" label="5"></option>
+            <option value="6" label="6"></option>
+            <option value="7" label="7"></option>
+            <option value="8" label="8"></option>
+          </DataList>
         </LineWidthContainer>
         <VideoContainer>
           <Video ref={videoRef} autoPlay />
@@ -1190,14 +1227,46 @@ export default function Room() {
         <PaperContainer>
           <Paper width={PAPER_CANVAS_WIDTH_PX} height={PAPER_CANVAS_HEIGHT_PX}>
             <ToolBox>
-              <Circle color="black" selectedColor={selectedColor} />
-              <Circle color="red" selectedColor={selectedColor} />
-              <Circle color="orange" selectedColor={selectedColor} />
-              <Circle color="yellow" selectedColor={selectedColor} />
-              <Circle color="green" selectedColor={selectedColor} />
-              <Circle color="blue" selectedColor={selectedColor} />
-              <Circle color="navy" selectedColor={selectedColor} />
-              <Circle color="purple" selectedColor={selectedColor} />
+              <Circle
+                color="black"
+                onClick={() => changeColorHandler("black")}
+                selectedColor={selectedColor}
+              />
+              <Circle
+                color="red"
+                onClick={() => changeColorHandler("red")}
+                selectedColor={selectedColor}
+              />
+              <Circle
+                color="orange"
+                onClick={() => changeColorHandler("orange")}
+                selectedColor={selectedColor}
+              />
+              <Circle
+                color="yellow"
+                onClick={() => changeColorHandler("yellow")}
+                selectedColor={selectedColor}
+              />
+              <Circle
+                color="green"
+                onClick={() => changeColorHandler("green")}
+                selectedColor={selectedColor}
+              />
+              <Circle
+                color="blue"
+                onClick={() => changeColorHandler("blue")}
+                selectedColor={selectedColor}
+              />
+              <Circle
+                color="navy"
+                onClick={() => changeColorHandler("navy")}
+                selectedColor={selectedColor}
+              />
+              <Circle
+                color="purple"
+                onClick={() => changeColorHandler("purple")}
+                selectedColor={selectedColor}
+              />
             </ToolBox>
           </Paper>
           <PaperCanvas
@@ -1240,8 +1309,32 @@ const Wrapper = styled.div`
   overflow: hidden;
 `;
 
+const LeftContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+  align-items: center;
+  font-size: 3rem;
+  font-weight: 800;
+  width: 30vw;
+  height: 800px;
+  color: rgb(242, 65, 57);
+
+  div {
+    margin-bottom: 2.5rem;
+  }
+`;
+
+const RightContainer = styled.div`
+  position: relative;
+  width: 70vw;
+  height: 100vh;
+  padding: 0 50px;
+`;
+
 const LineWidthContainer = styled.div`
   display: flex;
+  flex-direction: column;
 `;
 
 const VideoContainer = styled.div`
@@ -1265,35 +1358,33 @@ const Circle = styled.div`
       ${fadeIn} 0.5s linear 0s forwards
     `};
   border: 5px solid rgb(255, 255, 255);
+  cursor: pointer;
 `;
 
-const LineWidthDisplay = styled.div`
-  width: ${(props) => `${props.lineWidth}px`};
-  height: 100px;
-  background: ${(props) => props.color};
-`;
+const LineWidthSlider = styled.input`
+  -webkit-appearance: none;
+  width: 100%;
+  height: 10px;
+  background-color: rgb(60, 179, 113);
+  outline: none;
 
-const LeftContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-  text-align: center;
-  align-items: center;
-  font-size: 5rem;
-  font-weight: 800;
-  width: 30vw;
-  height: 800px;
-  color: rgb(242, 65, 57);
-
-  div {
-    margin-bottom: 2.5rem;
+  &::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    background-color: rgb(242, 65, 57);
+    transform: translateY(-25%);
+    cursor: pointer;
   }
 `;
 
-const RightContainer = styled.div`
-  position: relative;
-  width: 70vw;
-  height: 100vh;
-  padding: 0 50px;
+const DataList = styled.datalist`
+  display: flex;
+  font-size: 20px;
+  justify-content: space-between;
+  padding-top: 10px;
+  width: 350px;
 `;
 
 const Video = styled.video`
