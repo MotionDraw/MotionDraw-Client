@@ -57,7 +57,7 @@ export default function MyCursor({ roomName, canvas }) {
                 cursor.leftHand.x +
                 canvas.current.offsetLeft +
                 canvas.current.offsetParent.offsetParent.offsetLeft +
-                50 -
+                35 -
                 80 +
                 5
             }

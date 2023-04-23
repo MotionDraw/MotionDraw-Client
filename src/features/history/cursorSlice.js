@@ -1,4 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
+import { PAPER_CANVAS_WIDTH } from "../../constants/canvasConfig";
 
 const initialState = {
   rightHand: {
@@ -6,7 +7,7 @@ const initialState = {
     y: 0,
   },
   leftHand: {
-    x: 0,
+    x: PAPER_CANVAS_WIDTH,
     y: 0,
   },
   count: 0,

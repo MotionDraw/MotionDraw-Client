@@ -18,7 +18,9 @@ import {
   CANVAS_HEIGHT_OFFSET,
   MAX_THICKNESS,
   MIN_THICKNESS,
+  PAPER_CANVAS_HEIGHT,
   PAPER_CANVAS_HEIGHT_PX,
+  PAPER_CANVAS_WIDTH,
   PAPER_CANVAS_WIDTH_PX,
   THICKNESS,
 } from "../constants/canvasConfig";
@@ -42,6 +44,7 @@ export default function Room() {
   const videoCanvasRef = useRef(null);
   const paperCanvasRef = useRef(null);
   const cursorCanvasRef = useRef(null);
+  const previewCanvasRef = useRef(null);
   const cleanupCalled = useRef(false);
   const { roomName } = useParams();
   const [gestureRecognizer, setGestureRecognizer] = useState();
@@ -126,8 +129,11 @@ export default function Room() {
     const videoCtx = videoCanvasRef.current.getContext("2d");
     const paperCtx = paperCanvasRef.current.getContext("2d");
     const cursorCtx = cursorCanvasRef.current.getContext("2d");
+    const preiviewCtx = previewCanvasRef.current.getContext("2d");
 
     function renderLoop() {
+      preiviewCtx.clearRect(0, 0, PAPER_CANVAS_WIDTH, PAPER_CANVAS_HEIGHT);
+
       if (videoRef.current && videoRef.current.readyState === 4) {
         const nowInMs = Date.now();
         const gestureRecognitionResult = gestureRecognizer.recognizeForVideo(
@@ -342,6 +348,15 @@ export default function Room() {
               "ILoveYou" &&
             gestureRecognitionResult.gestures[1][0].categoryName === "ILoveYou"
           ) {
+            drawStraightLine(
+              preiviewCtx,
+              leftHandXPosition,
+              leftHandYPosition,
+              rightHandXPosition,
+              rightHandYPosition,
+              lineWidth,
+              "Preview"
+            );
             setIsShapeReady(false);
             setShape("StraightLine");
           } else if (
@@ -349,6 +364,15 @@ export default function Room() {
               "Victory" &&
             gestureRecognitionResult.gestures[1][0].categoryName === "ILoveYou"
           ) {
+            drawRectangle(
+              preiviewCtx,
+              leftHandXPosition,
+              leftHandYPosition,
+              rightHandXPosition,
+              rightHandYPosition,
+              lineWidth,
+              "Preview"
+            );
             setIsShapeReady(false);
             setShape("Rectangle");
           } else if (
@@ -356,6 +380,14 @@ export default function Room() {
               "Pointing_Up" &&
             gestureRecognitionResult.gestures[1][0].categoryName === "ILoveYou"
           ) {
+            drawCircle(
+              preiviewCtx,
+              leftHandXPosition,
+              leftHandYPosition,
+              rightHandXPosition,
+              rightHandYPosition,
+              "Preview"
+            );
             setIsShapeReady(false);
             setShape("Circle");
           }
@@ -509,6 +541,15 @@ export default function Room() {
               "ILoveYou" &&
             gestureRecognitionResult.gestures[1][0].categoryName === "ILoveYou"
           ) {
+            drawStraightLine(
+              preiviewCtx,
+              leftHandXPosition,
+              leftHandYPosition,
+              rightHandXPosition,
+              rightHandYPosition,
+              lineWidth,
+              "Preview"
+            );
             setIsShapeReady(false);
             setShape("StraightLine");
           } else if (
@@ -516,6 +557,15 @@ export default function Room() {
               "ILoveYou" &&
             gestureRecognitionResult.gestures[1][0].categoryName === "Victory"
           ) {
+            drawRectangle(
+              preiviewCtx,
+              leftHandXPosition,
+              leftHandYPosition,
+              rightHandXPosition,
+              rightHandYPosition,
+              lineWidth,
+              "Preview"
+            );
             setIsShapeReady(false);
             setShape("Rectangle");
           } else if (
@@ -524,6 +574,14 @@ export default function Room() {
             gestureRecognitionResult.gestures[1][0].categoryName ===
               "Pointing_Up"
           ) {
+            drawCircle(
+              preiviewCtx,
+              leftHandXPosition,
+              leftHandYPosition,
+              rightHandXPosition,
+              rightHandYPosition,
+              "Preview"
+            );
             setIsShapeReady(false);
             setShape("Circle");
           }
@@ -903,7 +961,6 @@ export default function Room() {
         data.result.handednesses.length === 1 &&
         data.result.handednesses[0][0].categoryName === "Left"
       ) {
-        console.log(data.socketId);
         drawLine(
           data.result,
           ctx,
@@ -1150,6 +1207,11 @@ export default function Room() {
           />
           <PaperCanvas
             ref={cursorCanvasRef}
+            width={PAPER_CANVAS_WIDTH_PX}
+            height={PAPER_CANVAS_HEIGHT_PX}
+          />
+          <PaperCanvas
+            ref={previewCanvasRef}
             width={PAPER_CANVAS_WIDTH_PX}
             height={PAPER_CANVAS_HEIGHT_PX}
           />
