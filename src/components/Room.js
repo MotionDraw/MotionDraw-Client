@@ -39,6 +39,7 @@ import {
   setRightCursorPosition,
 } from "../features/history/cursorSlice";
 import OthersCursor from "./OthersCursor";
+import Circle from "./Circle";
 
 export default function Room() {
   const videoRef = useRef(null);
@@ -1239,41 +1240,49 @@ export default function Room() {
                 color="black"
                 onClick={() => changeColorHandler("black")}
                 selectedColor={selectedColor}
+                dispatch={dispatch}
               />
               <Circle
                 color="red"
                 onClick={() => changeColorHandler("red")}
                 selectedColor={selectedColor}
+                dispatch={dispatch}
               />
               <Circle
                 color="orange"
                 onClick={() => changeColorHandler("orange")}
                 selectedColor={selectedColor}
+                dispatch={dispatch}
               />
               <Circle
                 color="yellow"
                 onClick={() => changeColorHandler("yellow")}
                 selectedColor={selectedColor}
+                dispatch={dispatch}
               />
               <Circle
                 color="green"
                 onClick={() => changeColorHandler("green")}
                 selectedColor={selectedColor}
+                dispatch={dispatch}
               />
               <Circle
                 color="blue"
                 onClick={() => changeColorHandler("blue")}
                 selectedColor={selectedColor}
+                dispatch={dispatch}
               />
               <Circle
                 color="navy"
                 onClick={() => changeColorHandler("navy")}
                 selectedColor={selectedColor}
+                dispatch={dispatch}
               />
               <Circle
                 color="purple"
                 onClick={() => changeColorHandler("purple")}
                 selectedColor={selectedColor}
+                dispatch={dispatch}
               />
             </ToolBox>
           </Paper>
@@ -1297,15 +1306,6 @@ export default function Room() {
     </Wrapper>
   );
 }
-
-const fadeIn = keyframes`
-  from {
-    opacity: 0.3;
-  }
-  to {
-    opacity: 1;
-  }
-`;
 
 const Wrapper = styled.div`
   padding-top: 50px;
@@ -1351,22 +1351,6 @@ const VideoContainer = styled.div`
 
 const PaperContainer = styled.div`
   position: absolute;
-`;
-
-const Circle = styled.div`
-  margin: 5px;
-  width: 55px;
-  height: 55px;
-  background-color: ${(props) => props.color};
-  border-radius: 50%;
-  opacity: 0.3;
-  animation: ${(props) =>
-    props.selectedColor === props.color &&
-    css`
-      ${fadeIn} 0.5s linear 0s forwards
-    `};
-  border: 5px solid rgb(255, 255, 255);
-  cursor: pointer;
 `;
 
 const LineWidthSlider = styled.input`

@@ -7,7 +7,8 @@ import { socket } from "./App";
 export default function MyCursor({ roomName, canvas }) {
   const [invisibleCount, setInvisibleCount] = useState(5);
   const cursor = useSelector((state) => state.cursor);
-  const count = useSelector((state) => state.cursor.count);
+  const leftCount = useSelector((state) => state.cursor.leftCount);
+  const rightCount = useSelector((state) => state.cursor.rightCount);
 
   useEffect(() => {
     socket.emit("cursorPosition", roomName, socket.id, cursor);
@@ -48,6 +49,7 @@ export default function MyCursor({ roomName, canvas }) {
                 5
             }
           >
+            <ProgressBar progress={rightCount * 3.3} />
             RightHand
           </RightCursor>
           <LeftCursor
@@ -70,7 +72,7 @@ export default function MyCursor({ roomName, canvas }) {
                 5
             }
           >
-            <ProgressBar progress={count} />
+            <ProgressBar progress={leftCount} />
             LeftHand
           </LeftCursor>
         </>

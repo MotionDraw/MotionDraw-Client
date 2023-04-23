@@ -10,7 +10,8 @@ const initialState = {
     x: PAPER_CANVAS_WIDTH,
     y: 0,
   },
-  count: 0,
+  leftCount: 0,
+  rightCount: 0,
 };
 
 export const cursorSlice = createSlice({
@@ -23,13 +24,20 @@ export const cursorSlice = createSlice({
     setRightCursorPosition: (state, action) => {
       state.rightHand = action.payload;
     },
-    setCount: (state, action) => {
-      state.count = action.payload;
+    setLeftCount: (state, action) => {
+      state.leftCount = action.payload;
+    },
+    setRightCount: (state, action) => {
+      state.rightCount = action.payload;
     },
   },
 });
 
-export const { setLeftCursorPosition, setRightCursorPosition, setCount } =
-  cursorSlice.actions;
+export const {
+  setLeftCursorPosition,
+  setRightCursorPosition,
+  setLeftCount,
+  setRightCount,
+} = cursorSlice.actions;
 
 export default cursorSlice.reducer;

@@ -97,21 +97,21 @@ export default function Modal({ isModalOpen, modalCloseHandler }) {
 
           <li>양손</li>
           <ol>
-            <li>왼손 : ILoveYou, 오른손: ILoveYou -> Open_Palm</li>
+            <li>왼손 : ILoveYou, 오른손: ILoveYou -&gt; Open_Palm</li>
             <ul>
               <li>
                 왼손 손동작을 유지하며 오른손 손동작을 변경하면 직선 도형을
                 그립니다.
               </li>
             </ul>
-            <li>왼손 : ILoveYou, 오른손: Pointing_Up -> Open_Palm</li>
+            <li>왼손 : ILoveYou, 오른손: Pointing_Up -&gt; Open_Palm</li>
             <ul>
               <li>
                 왼손 손동작을 유지하며 오른손 손동작을 변경하면 원 도형을
                 그립니다.
               </li>
             </ul>
-            <li>왼손 : ILoveYou, 오른손: Victory -> Open_Palm</li>
+            <li>왼손 : ILoveYou, 오른손: Victory -&gt; Open_Palm</li>
             <ul>
               <li>
                 왼손 손동작을 유지하며 오른손 손동작을 변경하면 직사각형 도형을
