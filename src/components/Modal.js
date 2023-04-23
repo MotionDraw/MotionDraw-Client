@@ -1,17 +1,23 @@
 import styled from "styled-components";
 import { useRef } from "react";
 
-export default function Modal({ modalCloseHandler }) {
+export default function Modal({ isModalOpen, modalCloseHandler }) {
   const modalRef = useRef(null);
 
-  function closeModal() {
+  function clickBackgroundHandler(e) {
+    if (modalRef.current === e.target) {
+      modalCloseHandler(false);
+    }
+  }
+
+  function closeModalHandler() {
     modalCloseHandler(false);
   }
 
   return (
-    <ModalBackground>
-      <ModalContainer ref={modalRef}>
-        <CloseButton onClick={closeModal}>X</CloseButton>
+    <ModalBackground ref={modalRef} onClick={clickBackgroundHandler}>
+      <ModalContainer>
+        <CloseButton onClick={closeModalHandler}>X</CloseButton>
         <ul>
           <li>손동작 종류</li>
         </ul>
@@ -88,6 +94,31 @@ export default function Modal({ modalCloseHandler }) {
               <li>선을 그리는 Draw모드로 전환합니다.</li>
             </ul>
           </ol>
+
+          <li>양손</li>
+          <ol>
+            <li>왼손 : ILoveYou, 오른손: ILoveYou -> Open_Palm</li>
+            <ul>
+              <li>
+                왼손 손동작을 유지하며 오른손 손동작을 변경하면 직선 도형을
+                그립니다.
+              </li>
+            </ul>
+            <li>왼손 : ILoveYou, 오른손: Pointing_Up -> Open_Palm</li>
+            <ul>
+              <li>
+                왼손 손동작을 유지하며 오른손 손동작을 변경하면 원 도형을
+                그립니다.
+              </li>
+            </ul>
+            <li>왼손 : ILoveYou, 오른손: Victory -> Open_Palm</li>
+            <ul>
+              <li>
+                왼손 손동작을 유지하며 오른손 손동작을 변경하면 직사각형 도형을
+                그립니다.
+              </li>
+            </ul>
+          </ol>
         </ul>
       </ModalContainer>
     </ModalBackground>
@@ -110,7 +141,7 @@ const ModalContainer = styled.div`
   height: 90%;
 
   z-index: 999;
-  font-size: 50px;
+  font-size: 25px;
   position: absolute;
   top: 50%;
   left: 50%;

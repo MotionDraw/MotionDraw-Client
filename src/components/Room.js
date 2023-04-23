@@ -318,6 +318,10 @@ export default function Room() {
           ) {
             setMode("Move");
           } else if (
+            gestureRecognitionResult.gestures[1][0].categoryName === "ILoveYou"
+          ) {
+            setMode("Shape");
+          } else if (
             gestureRecognitionResult.gestures[0][0].categoryName === "Victory"
           ) {
             setMode("Erase");
@@ -510,6 +514,10 @@ export default function Room() {
             gestureRecognitionResult.gestures[1][0].categoryName === "Open_Palm"
           ) {
             setMode("Move");
+          } else if (
+            gestureRecognitionResult.gestures[0][0].categoryName === "ILoveYou"
+          ) {
+            setMode("Shape");
           } else if (
             gestureRecognitionResult.gestures[1][0].categoryName === "Victory"
           ) {
