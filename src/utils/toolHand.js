@@ -25,9 +25,9 @@ export function changePrevColor(setColor, dispatch) {
   }
 
   if (count > 20) {
-    setColor(colorArr[index]);
     count = 0;
     index--;
+    setColor(colorArr[index]);
     if (index < 0) {
       index = colorArr.length - 1;
     }
@@ -45,9 +45,9 @@ export function changeNextColor(setColor, dispatch) {
   }
 
   if (count > 20) {
-    setColor(colorArr[index]);
     count = 0;
     index++;
+    setColor(colorArr[index]);
     if (index > colorArr.length - 1) {
       index = 0;
     }
