@@ -73,10 +73,13 @@ export default function Lobby() {
           <div style={{ color: "white" }}>Rooms</div>
           {Object.values(rooms).map((element, index) => {
             return (
-              <Room key={index} onClick={() => onClickRoom(element.roomName)}>
+              <WaitingRoom
+                key={index}
+                onClick={() => onClickRoom(element.roomName)}
+              >
                 <div>방제목 : {element.roomName}</div>
                 <div>{element.playerCount} 명 접속</div>
-              </Room>
+              </WaitingRoom>
             );
           })}
         </RoomsLists>
@@ -134,7 +137,7 @@ const RoomsLists = styled.div`
   background-color: rgba(0, 0, 0, 0.3);
 `;
 
-const Room = styled.div`
+const WaitingRoom = styled.div`
   position: relative;
   display: flex;
   justify-content: space-between;

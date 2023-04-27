@@ -139,5 +139,5 @@ const ProgressBar = styled.div`
   border-bottom-left-radius: 20px;
   border-bottom-right-radius: 20px;
 
-  background: rgba(242, 65, 57);
+  background: rgba(242, 65, 57, 0.5);
 `;

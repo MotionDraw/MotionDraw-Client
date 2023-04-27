@@ -1,14 +1,15 @@
+import React, { useRef, useState, useEffect } from "react";
 import styled, { keyframes, css } from "styled-components";
-import { useRef, useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { PAPER_CANVAS_WIDTH } from "../constants/canvasConfig";
 import { setRightCount } from "../features/history/cursorSlice";
 
-export default function Circle({ color, onClick, selectedColor }) {
+export default function ColorCircle({ color, onClick, selectedColor }) {
   const circleRef = useRef(null);
   const dispatch = useDispatch();
   const rightHandCursor = useSelector((state) => state.cursor.rightHand);
   const [count, setCount] = useState(0);
+  const [isHoverd, setIsHovered] = useState(false);
 
   function changeColorHandler(color) {
     onClick(color);
@@ -35,24 +36,47 @@ export default function Circle({ color, onClick, selectedColor }) {
     return false;
   }
 
+  function isInsideToolBox(x, y) {
+    const circle = circleRef.current;
+
+    if (circle) {
+      const circleLeft = circle.offsetParent.offsetLeft;
+      if (x >= circleLeft && x <= 900 - 10) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
   useEffect(() => {
     if (
       isInsideCircle(PAPER_CANVAS_WIDTH - rightHandCursor.x, rightHandCursor.y)
     ) {
+      setIsHovered(true);
       setCount(count + 1);
       dispatch(setRightCount(count));
-    } else {
+    }
+
+    if (
+      !isInsideToolBox(
+        PAPER_CANVAS_WIDTH - rightHandCursor.x,
+        rightHandCursor.y
+      )
+    ) {
       setCount(0);
+      dispatch(setRightCount(count));
     }
 
     if (count > 30) {
       onClick(color);
       setCount(0);
     }
-  }, [rightHandCursor]);
+  }, [rightHandCursor, isHoverd, selectedColor, color, onClick, dispatch]);
 
   return (
     <CircleStyle
+      data-testid="circle"
       ref={circleRef}
       color={color}
       onClick={() => changeColorHandler(color)}

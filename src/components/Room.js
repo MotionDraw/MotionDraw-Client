@@ -1,4 +1,4 @@
-import styled, { keyframes, css } from "styled-components";
+import styled from "styled-components";
 import Modal from "./Modal";
 import { useEffect, useRef, useState } from "react";
 import { drawLandmarks, drawConnectors } from "@mediapipe/drawing_utils";
@@ -28,6 +28,7 @@ import {
 import { socket } from "./App";
 import { useDispatch, useSelector } from "react-redux";
 import { pushHistory, setHistory } from "../features/history/historySlice";
+import { setLeftCount } from "../features/history/cursorSlice";
 import MyCursor from "./MyCursor";
 import {
   drawStraightLine,
@@ -39,7 +40,7 @@ import {
   setRightCursorPosition,
 } from "../features/history/cursorSlice";
 import OthersCursor from "./OthersCursor";
-import Circle from "./Circle";
+import ColorCircle from "./ColorCircle";
 
 export default function Room() {
   const videoRef = useRef(null);
@@ -287,6 +288,12 @@ export default function Room() {
             if (decreasesLineWidth(dispatch) && lineWidth > MIN_THICKNESS) {
               setLineWidth(lineWidth - THICKNESS);
             }
+          } else if (
+            gestureRecognitionResult.gestures[0][0].categoryName === "ILoveYou"
+          ) {
+            setMode("Shape");
+          } else {
+            dispatch(setLeftCount(0));
           }
 
           dispatch(
@@ -352,6 +359,8 @@ export default function Room() {
             if (decreasesLineWidth(dispatch) && lineWidth > MIN_THICKNESS) {
               setLineWidth(lineWidth - THICKNESS);
             }
+          } else {
+            dispatch(setLeftCount(0));
           }
 
           if (
@@ -549,6 +558,8 @@ export default function Room() {
             if (increasesLineWidth(dispatch) && lineWidth > MIN_THICKNESS) {
               setLineWidth(lineWidth - THICKNESS);
             }
+          } else {
+            dispatch(setLeftCount(0));
           }
 
           if (
@@ -717,6 +728,7 @@ export default function Room() {
     if (isInitCanvas) {
       return;
     }
+
     socket.emit("sendHistory", roomName);
   }, [isInitCanvas, roomName]);
 
@@ -1236,49 +1248,49 @@ export default function Room() {
         <PaperContainer>
           <Paper width={PAPER_CANVAS_WIDTH_PX} height={PAPER_CANVAS_HEIGHT_PX}>
             <ToolBox>
-              <Circle
+              <ColorCircle
                 color="black"
                 onClick={() => changeColorHandler("black")}
                 selectedColor={selectedColor}
                 dispatch={dispatch}
               />
-              <Circle
+              <ColorCircle
                 color="red"
                 onClick={() => changeColorHandler("red")}
                 selectedColor={selectedColor}
                 dispatch={dispatch}
               />
-              <Circle
+              <ColorCircle
                 color="orange"
                 onClick={() => changeColorHandler("orange")}
                 selectedColor={selectedColor}
                 dispatch={dispatch}
               />
-              <Circle
+              <ColorCircle
                 color="yellow"
                 onClick={() => changeColorHandler("yellow")}
                 selectedColor={selectedColor}
                 dispatch={dispatch}
               />
-              <Circle
+              <ColorCircle
                 color="green"
                 onClick={() => changeColorHandler("green")}
                 selectedColor={selectedColor}
                 dispatch={dispatch}
               />
-              <Circle
+              <ColorCircle
                 color="blue"
                 onClick={() => changeColorHandler("blue")}
                 selectedColor={selectedColor}
                 dispatch={dispatch}
               />
-              <Circle
+              <ColorCircle
                 color="navy"
                 onClick={() => changeColorHandler("navy")}
                 selectedColor={selectedColor}
                 dispatch={dispatch}
               />
-              <Circle
+              <ColorCircle
                 color="purple"
                 onClick={() => changeColorHandler("purple")}
                 selectedColor={selectedColor}
