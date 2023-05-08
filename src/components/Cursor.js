@@ -1,3 +1,4 @@
+import React from "react";
 import styled from "styled-components";
 import { useState, useEffect } from "react";
 
@@ -10,15 +11,17 @@ export default function Cursor({ cursor, canvas }) {
         setInvisibleCount((count) => count - 1);
       }
     }, 1000);
+
     return () => clearInterval(timer);
   }, [invisibleCount]);
 
   useEffect(() => {
     setInvisibleCount(5);
   }, [cursor]);
+
   return (
     <>
-      {invisibleCount !== 0 && (
+      {invisibleCount > 0 && (
         <RightCursor
           left={
             canvas.current &&

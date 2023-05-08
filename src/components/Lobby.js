@@ -11,6 +11,10 @@ export default function Lobby() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
+  function onPlay() {
+    navigate(`/rooms/solo`);
+  }
+
   function onClickRoom(roomName) {
     socket.emit("joinRoom", roomName, (response) => {
       if (response.success) {
@@ -85,6 +89,7 @@ export default function Lobby() {
         </RoomsLists>
       </RoomsContainer>
       <ButtonContainer>
+        <StyledButton onClick={onPlay}>혼자하기</StyledButton>
         <StyledButton onClick={onCreateRoom}>방 만들기</StyledButton>
         <StyledButton onClick={refreshHandler}>새로고침</StyledButton>
       </ButtonContainer>

@@ -1,7 +1,7 @@
 import styled from "styled-components";
 import { useRef } from "react";
 
-export default function Modal({ isModalOpen, modalCloseHandler }) {
+export default function Modal({ modalCloseHandler }) {
   const modalRef = useRef(null);
 
   function clickBackgroundHandler(e) {
@@ -24,68 +24,66 @@ export default function Modal({ isModalOpen, modalCloseHandler }) {
         <GestureContainer>
           <figure>
             <Image src="/img/Open_Palm.png" />
-            <figcaption>Open_Palm</figcaption>
+            <figcaption>주먹 펴기</figcaption>
           </figure>
           <figure>
             <Image src="/img/Closed_Fist.png" />
-            <figcaption>Closed_Fist</figcaption>
+            <figcaption>주먹 쥐기</figcaption>
           </figure>
           <figure>
             <Image src="/img/Pointing_Up.png" />
-            <figcaption>Pointing_Up</figcaption>
+            <figcaption>검지 올리기</figcaption>
           </figure>
           <figure>
             <Image src="/img/Thumb_Up.png" />
-            <figcaption>Thumb_Up</figcaption>
+            <figcaption>엄지 올리기</figcaption>
           </figure>
           <figure>
             <Image src="/img/Thumb_Down.png" />
-            <figcaption>Thumb_Down</figcaption>
+            <figcaption>엄지 내리기</figcaption>
           </figure>
           <figure>
             <Image src="/img/Victory.png" />
-            <figcaption>Victory</figcaption>
+            <figcaption>V 포즈</figcaption>
           </figure>
           <figure>
             <Image src="/img/ILoveYou.png" />
-            <figcaption>ILoveYou</figcaption>
+            <figcaption>사랑해 포즈</figcaption>
           </figure>
         </GestureContainer>
 
         <ul>
           <li>왼손</li>
           <ol>
-            <li>Open_Palm</li>
+            <li>주먹 펴기</li>
             <ul>
               <li>
                 0.5초 동안 자세를 유지하면 선의 굵기/지우개 크기가 커집니다.
               </li>
             </ul>
-            <li>Closed_Fist</li>
+            <li>주먹 쥐기</li>
             <ul>
               <li>
                 0.5초 동안 자세를 유지하면 선의 굵기/지우개 크기가 작아집니다.
               </li>
             </ul>
-            <li>Thumb_Up</li>
+            <li>엄지 올리기</li>
             <ul>
               <li>2초 동안 자세를 유지하면 다음 색으로 변경됩니다.</li>
             </ul>
-            <li>Thumb_Down</li>
+            <li>엄지 내리기</li>
             <ul>
               <li>2초 동안 자세를 유지하면 이전 색으로 변경됩니다.</li>
             </ul>
           </ol>
-
           <br />
-
           <li>오른손</li>
           <ol>
-            <li>Open_Palm</li>
+            <li>주먹 펴기</li>
             <ul>
               <li>커서를 이동시키는 Move모드로 전환합니다.</li>
             </ul>
-            <li>Open_Palm</li>
+            <li>V 포즈</li>
             <ul>
               <li>지울수 있는 Erase모드로 전환합니다.</li>
             </ul>
@@ -94,24 +92,24 @@ export default function Modal({ isModalOpen, modalCloseHandler }) {
               <li>선을 그리는 Draw모드로 전환합니다.</li>
             </ul>
           </ol>
-
+          <br />
           <li>양손</li>
           <ol>
-            <li>왼손 : ILoveYou, 오른손: ILoveYou -&gt; Open_Palm</li>
+            <li>왼손 : 사랑해 포즈, 오른손: 사랑해 포즈 -&gt; 주먹 펴기</li>
             <ul>
               <li>
                 왼손 손동작을 유지하며 오른손 손동작을 변경하면 직선 도형을
                 그립니다.
               </li>
             </ul>
-            <li>왼손 : ILoveYou, 오른손: Pointing_Up -&gt; Open_Palm</li>
+            <li>왼손 : 사랑해 포즈, 오른손: 검지 올리기 -&gt; 주먹 펴기</li>
             <ul>
               <li>
                 왼손 손동작을 유지하며 오른손 손동작을 변경하면 원 도형을
                 그립니다.
               </li>
             </ul>
-            <li>왼손 : ILoveYou, 오른손: Victory -&gt; Open_Palm</li>
+            <li>왼손 : 사랑해 포즈, 오른손: V 포즈 -&gt; 주먹 펴기</li>
             <ul>
               <li>
                 왼손 손동작을 유지하며 오른손 손동작을 변경하면 직사각형 도형을
