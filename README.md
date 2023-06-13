@@ -195,15 +195,146 @@ prevPosition = { ...prevPosition, [socketId]: { x, y } };
 ## 4. 성능 개선 방향
 
 ### 어떻게 해야 그림을 더 부드럽게 그릴 수 있을까?
+> 개발자 도구의 Performance탭을 사용하여 성능 분석
 
-그림 그릴 때 가끔 화면이 버벅이는 것처럼 느껴지는 이유를 조사해 봤습니다. 브라우저는 한 프레임당 16.67ms 1초에 60번의 프레임을 보여주는 식으로 동작합니다. 하지만 손 모양을 인식하고 그림을 그리는 함수의 실행시간이 49ms에서 120ms 사이로 동작하는 것을 개발자 도구의 Performance 측정으로 알아냈습니다. 함수에서 대부분의 시간은 MideaPipe에서 을 인식하는 함수에서 소요되는 것으로 파악됐습니다.
+그림 그릴 때 가끔 화면이 버벅이는 것처럼 느껴지는 이유를 조사해 봤습니다. 브라우저는 한 프레임당 16.67ms 1초에 60번의 프레임을 보여주는 식으로 동작합니다. 하지만 손 모양을 인식하고 그림을 그리는 함수의 실행시간이 약 50ms에서 100ms 사이로 동작하는 것을 개발자 도구의 Performance 측정으로 알아냈습니다. 함수에서 대부분의 시간은 MediaPipe에서 손 모양을 인식하는 함수에서 소요되는 것으로 파악됐습니다.
 
-그래서 성능을 개선할 수 있는 가능성 중 하나는 MideaPipe의 함수 실행시간을 단축하는 방법과 함수 실행시간을 단축하지 못하더라도 똑같은 함수가 두 번 호출되는 현상을 파악하여 막을 수 있는 방식을 알아낸다면 성능을 개선할 수 있을 것으로 생각합니다.
+> 개선 방향 두 가지
 
-다른 방법으로는 성능을 개선하기 위하여 `setTimeout` 동작방식과 `rAF(requestAnimationFrame)`의 동작 방식을 비교했을 때 `rAF`로 동작하는 방식이 브라우저의 최적화되어 효율적인 애니메이션을 구현할 것이라 예상하였습니다. 하지만 실제로 두 가지 방법을 모두 사용해 보았을 때 `rAF`는 그림이 끊기면서 그려지고 `setTimeout` 방식이 더 부드럽고 끊기지 않게 그려지는 상황이 일어났습니다.
+1. MediaPipe 함수 실행시간 단축
+2. setTimeout에서 requestAnimationFrame으로 변경
+
+> renderLoop 함수 내부에서 외부 함수가 두번 호출되는 현상 파악
+
+첫번째 개선 방향으로는 MediaPipe에서 실행시간이 약 25ms인 내부 함수가 두번씩 호출되어 함수의 실행시간이 늘어나는 현상을 발견하였습니다. 브라우저에서 한 프레임을 표현하는 16.67ms보다 손 모양 인식 함수의 길이가 더 길기만 이는 외부 라이브러리를 사용하고 있는 개발자가 조절하지 못한다고 판단하였습니다. 그래서 함수 실행시간을 단축하지 못하더라도 똑같은 함수가 두 번 호출되는 현상을 파악하여 막을 수 있는 방식을 알아낸다면 성능을 개선할 수 있을 것으로 생각합니다.
 
 <img src="https://github.com/MotionDraw/MotionDraw-Client/assets/107802867/b27e576c-94f9-4eeb-842b-d4ebbcc4ced4"  width="400" height="300"/>
 <img src="https://github.com/MotionDraw/MotionDraw-Client/assets/107802867/00b63048-9275-4941-8bb3-f2a8b1e3cb96"  width="400" height="300"/>
+
+> setInterval 방식에서 rAF(requestAnimationFrame) 방식으로 변경
+
+두번째 성능 개선 방향은 `setInterval` 동작방식과 `rAF(requestAnimationFrame)`의 동작 방식과 장단점을 비교했을 때 `rAF`로 동작하는 방식이 브라우저에 최적화되어 효율적인 애니메이션을 구현할 것이라 예상하였습니다.
+
+|setInterval|차이점|rAF|
+|:-:|:-:|:-:|
+|delay 인자|초당 호출 횟수|자동|
+|실행 O|백그라운드|실행 X|
+|인자에 func,delay 설정|실행 방식|callback 내부에서 rAF 재호출|
+|리페인트 후|Task의 위치|리페인트 전|
+|Macro 큐|큐|Animation frames 큐|
+
+<p>
+  <img src="https://github.com/MotionDraw/MotionDraw-Client/assets/107802867/c2572015-aa99-43bd-a189-c593bdb21fcc"  width="400" height="300"/>
+  <br>
+  <em>JSConf, Jake Archibald: In the Loop의 setTimeout</em>
+</p>
+<p>
+  <img src="https://github.com/MotionDraw/MotionDraw-Client/assets/107802867/6f07344e-ca0e-4577-bb23-7d9999711af9"  width="400" height="300"/>
+  <br>
+  <em>JSConf,Jake Archibald: In the Loop의 requestAnimationFrame</em>
+</p>
+
+> 끊기면서 작동하는 rAF
+
+```js
+  useEffect(() => {
+    ...
+    // 기타 코드
+    
+    function renderLoop() {
+      ...
+      // 손 모양 인식 및 그리기 코드
+    }
+    
+    const id = setInterval(() => {
+      renderLoop();
+    }, 17);
+     
+     
+    return () => {
+      clearInterval(id);
+    };
+    }, [dependency]);
+```
+
+```js
+  useEffect(() => {
+    ...
+    // 기타 코드
+    
+    function renderLoop() {
+      ...
+      // 손 모양 인식 및 그리기 코드
+      
+      requestAnimationFrame(renderLoop);
+    }
+    
+    const id = requestAnimationFrame(renderLoop);
+     
+    return () => {
+      cancelAnimationFrame(id);
+    };
+    }, [dependency]);
+```
+
+실제로 두 가지 방법을 모두 사용해 보았을 때 예상과는 달리 제 코드에서는 `rAF`는 그림이 끊기면서 그려지고 `setInterval` 방식이 끊기지 않게 그려지는 상황이 일어났습니다.
+
+> 원인 추측
+
+1. rAF가 동작하면서 callback 함수가 한 프레임의 길이인 16.67ms보다 길어서 중간에 frame drop이 일어났을 것이다.
+2. `useEffect`에서 rAF 요청을 멈추는 `cancelAnimationFrame`에 id 전달 관련 문제일 것이다.
+
+> 첫번쨰 추측, rAF의 frame drop 현상 예상
+
+rAF가 동작하면서 callback 함수가 한 프레임의 길이인 16.67ms보다 길어서 중간에 frame drop이 일어났을 것이라고 생각했습니다.
+하지만 많은 조사를 통해 setInterval의 방식은 이전 callback 함수의 실행 시간과 상관없이 일정한 간격으로 다음 콜백함수를 예약하기 때문에 콜백함수가 지연되고 프라임이 누락되는 현상이 발생할 수 있고, rAF는 브라우저의 최적의 타이밍으로 애니메이션을 업데이트 하기 때문에 프레임이 누락되는 현상이 적다는 내용이었습니다. 실제로 각각의 방식을 같은 시간 측정하니 setInterval 방식이 frame drop이 발생하고 rAF 방식은 frame drop이 발생하지 않았습니다.
+
+> 두번째 추측, rAF의 id 전달 관련 문제
+
+```js
+  ...
+  ...
+  const requestRef = useRef(null); // useRef로 id 관리
+  
+  useEffect(() => {
+    ...
+    // 기타 코드
+    
+    function renderLoop() {
+      ...
+      // 손 모양 인식 및 그리기 코드
+      
+      requestRef.current = requestAnimationFrame(renderLoop);
+    }
+    
+    requestRef.current = requestAnimationFrame(renderLoop);
+     
+    return () => {
+      cancelAnimationFrame(id);
+    };
+    }, [dependency]);
+```
+
+> rAF 사용시 끊기는 원인은 `cancelAnimationFrame` 메서드에 잘못된 갱신되지 않은 id 전달
+
+첫번째 추측이 틀렸을 수 있다는 점을 깨닫고 다시 rAF를 사용한 코드를 살펴보았습니다. rAF의 동작 방식은 requestAnimationFrame을 호출하면 renderLoop를 호출하게되고 rederLoop가 호출되면 다시 requestAnimationFrame를 호출하여 계속해서 루프가 돌게되어 애니메이션이 구현되는 방식입니다. 그렇다면 cancelAnimationFrame를 사용하려면 rAF의 id가 필요하게 되는데 기존 코드는 id를 갱신하지 않고 초기 id를 cancelAnimationFrame의 인자로 넣은게 문제였습니다. 그래서 컴포넌트 상단에 useRef를 사용하여 id를 관리하여 이 문제를 해결하였습니다.
+
+> cancelAnimationFrame이 호출되지 않으면 애니메이션이 끊기게 되는 이유는 rAF의 중첩
+
+React에서 의존성 배열이 바뀌는데 cancelAnimationFrame이 호출되지 않으면 메모리나 CPU사용에 영향을 끼칠것이라 추측하였습니다. 그래서 개발자 도구의 Performance 탭을 이용하여 Task에 여러 개의 rAF가 중첩되는 문제가 생겼습니다. 그래서 똑같은 callback 함수가 한번에 겹쳐서 실행되어 브라우저의 성능이 느려지고 선이 끊겨서 그려지는 것이라고 판단하였습니다. 그리고 의존성 배열이 바뀌지 않는 상황이 발생하면 정상화 되는 결과도 관측하였습니다.
+
+<p>
+  <img src="https://github.com/MotionDraw/MotionDraw-Client/assets/107802867/9d2bb89b-32c9-4009-90ea-cd42409cfb47"  width="600" height="300"/>
+  <br>
+  <em>의존성 배열이 바뀌는 상황, 중첩된 rAF</em>
+</p>
+<p>
+  <img src="https://github.com/MotionDraw/MotionDraw-Client/assets/107802867/6115d2e5-a354-4a1b-84a6-525aff5904ce"  width="400" height="300"/>
+  <br>
+  <em>의존성 배열이 바뀌지 않는 상황, 정상적으로 호출되는 rAF</em>
+</p>
+
+
 
 # Schedule
 
