@@ -48,9 +48,10 @@ export default function Room() {
   const paperCanvasRef = useRef(null);
   const cursorCanvasRef = useRef(null);
   const previewCanvasRef = useRef(null);
+  const requestRef = useRef(null);
   const cleanupCalled = useRef(false);
   const { roomName } = useParams();
-  const [gestureRecognizer, setGestureRecognizer] = useState();
+  const [gestureRecognizer, setGestureRecognizer] = useState(null);
   const [selectedColor, setSelectedColor] = useState("black");
   const [mode, setMode] = useState("Move");
   const [shape, setShape] = useState("");
@@ -134,6 +135,7 @@ export default function Room() {
 
   useEffect(() => {
     if (!gestureRecognizer) return;
+
     const videoCtx = videoCanvasRef.current.getContext("2d");
     const paperCtx = paperCanvasRef.current.getContext("2d");
     const cursorCtx = cursorCanvasRef.current.getContext("2d");
@@ -704,14 +706,13 @@ export default function Room() {
         }
         videoCtx.restore();
       }
+      requestRef.current = requestAnimationFrame(renderLoop);
     }
 
-    const id = setInterval(() => {
-      renderLoop();
-    }, 40);
+    requestRef.current = requestAnimationFrame(renderLoop);
 
     return () => {
-      clearInterval(id);
+      cancelAnimationFrame(requestRef.current);
     };
   }, [
     gestureRecognizer,
