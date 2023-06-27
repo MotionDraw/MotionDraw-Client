@@ -2,6 +2,10 @@
     <img src="https://github.com/MotionDraw/MotionDraw-Client/assets/107802867/60992aed-0ffd-4d2f-aa49-c67cd0710a34" height="300px" width="700px">
 </p>
 
+<p align="center">
+    <img src="https://github.com/MotionDraw/MotionDraw-Client/assets/107802867/19c88a1d-b3b7-4024-bfc2-00d0d15c4582" style="border:2 solid black">
+</p>
+
 # Motion Draw
 `Motion Draw`는 MediaPipe의 Gesture recognition을 사용하여 `손 모양을 인식`하고 그것을 바탕으로 그림판을 구현하여 `socket 통신`으로 다른 사용자와 `함께` `그림`을 그릴 수 있게 하는 프로젝트입니다.
 
@@ -40,7 +44,8 @@
     - [3) 모드 변경 및 색 변경 시 커서에 progress bar 구현](#3-모드-변경-및-색-변경-시-커서에-progress-bar-구현)
     - [4) 색상에 마우스 올릴 시 색 변경 기능](#4-색상에-마우스-올릴-시-색-변경-기능)
   - [4. 성능 개선 방향](#4-성능-개선-방향)
-  	- [어떻게 해야 그림을 더 부드럽게 그릴 수 있을까?](#어떻게-해야-그림을-더-부드럽게-그릴-수-있을까)
+  	- [1. 어떻게 해야 그림을 더 부드럽게 그릴 수 있을까?](#1-어떻게-해야-그림을-더-부드럽게-그릴-수-있을까)
+    - [2. Custom Hook을 만들어 코드 최적화](2-custom-hook을-만들어-코드-최적화)
 - [Feature](#feature)
 - [Schedule](#schedule)
 - [Tech Stacks](#tech-stacks)
@@ -208,7 +213,7 @@ prevPosition = { ...prevPosition, [socketId]: { x, y } };
 
 ## 4. 성능 개선 방향
 
-### 어떻게 해야 그림을 더 부드럽게 그릴 수 있을까?
+### 1. 어떻게 해야 그림을 더 부드럽게 그릴 수 있을까?
 #### 개발자 도구의 Performance탭을 사용하여 성능 분석
 
 그림 그릴 때 가끔 화면이 버벅이는 것처럼 느껴지는 이유를 조사해 봤습니다. 브라우저는 한 프레임당 16.67ms 1초에 60번의 프레임을 보여주는 식으로 동작합니다. 하지만 손 모양을 인식하고 그림을 그리는 함수의 실행시간이 약 50ms에서 100ms 사이로 동작하는 것을 개발자 도구의 Performance 측정으로 알아냈습니다. 함수에서 대부분의 시간은 MediaPipe에서 손 모양을 인식하는 함수에서 소요되는 것으로 파악됐습니다.
@@ -348,6 +353,54 @@ React에서 의존성 배열이 바뀌는데 cancelAnimationFrame이 호출되�
   <em>의존성 배열이 바뀌지 않는 상황, 정상적으로 호출되는 rAF</em>
 </p>
 
+### 2. Custom Hook을 만들어 코드 최적화
+#### 커서 기능에서 발생한 중복 로직
+[5초가 지나면 커서가 사라지는 기능](#1-일정-시간-후-커서-사라지게-만들기)을 구현하면서 아래와 같은 로직을 발견하였습니다.
+
+```js
+  const [invisibleCount, setInvisibleCount] = useState(5);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      if (invisibleCount > 0) {
+        setInvisibleCount((count) => count - 1);
+      }
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [invisibleCount]);
+
+  useEffect(() => {
+    setInvisibleCount(5);
+  }, [cursor]);
+```
+
+카운트 다운 로직이 MyCursor 컴포넌트와 OthersCursor 컴포넌트가 서로 중복해서 사용되었다는 점을 파악하고 코드의 재사용성과 가독성, 추상화를 위하여 Custom Hook으로 만들어 관리하였습니다.
+
+```js
+export function useCursorDisappearCount(timerDuration, cursorPosition) {
+  const [cursorDisappearCount, setCursorDisappearCount] =
+    useState(timerDuration);
+
+  useEffect(() => {
+    const countIntervalId = setInterval(() => {
+      if (cursorDisappearCount > 0) {
+        setCursorDisappearCount((count) => count - 1);
+      }
+    }, 1000);
+
+    return () => clearInterval(countIntervalId);
+  }, [cursorDisappearCount]);
+
+  useEffect(() => {
+    setCursorDisappearCount(timerDuration);
+  }, [cursorPosition, timerDuration]);
+
+  return cursorDisappearCount;
+}
+```
+
+컴포넌트 이름과 변수 값을 더욱 명시적으로 작성하여 코드를 유지보수하기 편하게 변경하였습니다.
+
 # Feature
 ## 1. 커서 기능
 사용자의 왼손, 오른손 검지 위치를 표시 해 주는 커서 기능을 구현하였습니다.
@@ -471,7 +524,7 @@ React에서 의존성 배열이 바뀌는데 cancelAnimationFrame이 호출되�
 <details>
 <summary>설명 모달창</summary>
 <div>
-  <img src="https://github.com/MotionDraw/MotionDraw-Client/assets/107802867/d8bd8a0a-7630-448f-a81d-d63ced7f2376" alt"모드 변경 표시 기능" width="400" height="300"/>
+  <img src="https://github.com/MotionDraw/MotionDraw-Client/assets/107802867/d8bd8a0a-7630-448f-a81d-d63ced7f2376" alt"설명 모달창" width="400" height="300"/>
 </div>
 </details>
 
@@ -481,47 +534,38 @@ React에서 의존성 배열이 바뀌는데 cancelAnimationFrame이 호출되�
 <details>
 <summary>멀티 방 생성 기능</summary>
 <div>
-
+    <img src="https://github.com/MotionDraw/MotionDraw-Client/assets/107802867/6e4fa7fc-6fa3-4d64-8649-e856b6487c89" alt"방 생성 기능" width="400" height="300"/>
 </div>
 </details>
 
-## 14. 멀티 방 입장 기능
-멀티 방에 입장하여 다른 사용자와 같이 그림을 그릴 수 있는 기능입니다.
+## 14. 멀티 방 입장 기능 및 그림 불러오기 기능
+멀티 방에 입장하여 다른 사용자와 같이 그림을 그릴 수 있는 기능과 입장 시 다른 사용자가 그리던 그림을 불러오는 기능입니다.
 
 <details>
-<summary>멀티 방 입장 기능</summary>
+<summary>멀티 방 입장 기능 및 그림 불러오기 기능</summary>
 <div>
- 
+    <img src="https://github.com/MotionDraw/MotionDraw-Client/assets/107802867/f1cffa65-5d42-4dc5-a525-f478a53137aa" alt"입장 및 그림 불러오기 기능" width="400" height="300"/>
 </div>
 </details>
 
-## 15. 멀티 방 입장 시 그림 불러오기 기능
-멀티 방 입장 시 다른 사용자가 드리던 그림을 불러오는 기능입니다.
-
-<details>
-<summary>멀티 방 입장 기능</summary>
-<div>
- 
-</div>
-</details>
-
-## 16. 멀티 방 새로고침/자동 새로고침 기능
+## 15. 멀티 방 새로고침/자동 새로고침 기능
 로비에서 생성 된 멀티방 정보를 불러오는 새로고침 기능과, 5초마다 한번씩 자동으로 정보를 불러오는 자동 새로고침 기능입니다.
 
 <details>
 <summary>멀티 방 새로고침/자동 새로고침 기능</summary>
 <div>
-
+    <img src="https://github.com/MotionDraw/MotionDraw-Client/assets/107802867/64085f8f-c35a-489f-9f03-1cbee74e1445" alt"방 새로고침 기능" width="400" height="300"/>
+    <img src="https://github.com/MotionDraw/MotionDraw-Client/assets/107802867/fb74050c-f7be-486f-95ce-aad0e6b1f9c0" alt"방 자동 새로고침 기능" width="400" height="300"/>
 </div>
 </details>
 
-## 17. 멀티 플레이 기능
+## 16. 멀티 플레이 기능
 멀티 방에 입장하여 다른 사용자들과 그림을 그릴 수 있는 기능입니다.
 
 <details>
 <summary>멀티 플레이 기능</summary>
 <div>
-  
+    <img src="https://github.com/MotionDraw/MotionDraw-Client/assets/107802867/1a259ed7-7ec8-459c-95bc-aff858b23bdb" alt"멀티 플레이 기능" width="400" height="300"/>
 </div>
 </details>
 
