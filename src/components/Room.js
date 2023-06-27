@@ -48,7 +48,6 @@ export default function Room() {
   const paperCanvasRef = useRef(null);
   const cursorCanvasRef = useRef(null);
   const previewCanvasRef = useRef(null);
-  const requestRef = useRef(null);
   const cleanupCalled = useRef(false);
   const { roomName } = useParams();
   const [gestureRecognizer, setGestureRecognizer] = useState(null);
@@ -706,13 +705,14 @@ export default function Room() {
         }
         videoCtx.restore();
       }
-      requestRef.current = requestAnimationFrame(renderLoop);
     }
 
-    requestRef.current = requestAnimationFrame(renderLoop);
+    const id = setInterval(() => {
+      renderLoop();
+    }, 40);
 
     return () => {
-      cancelAnimationFrame(requestRef.current);
+      clearInterval(id);
     };
   }, [
     gestureRecognizer,
