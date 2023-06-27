@@ -1,35 +1,22 @@
-import { useState } from "react";
 import { useEffect } from "react";
 import { useSelector } from "react-redux";
 import styled from "styled-components";
 import { socket } from "./App";
+import { useCursorDisappearCount } from "../hooks/useCursorDisappearCount";
 
-export default function MyCursor({ roomName, canvas }) {
-  const [invisibleCount, setInvisibleCount] = useState(5);
+export default function DisplayMyCursor({ roomName, canvas }) {
   const cursor = useSelector((state) => state.cursor);
   const leftCount = useSelector((state) => state.cursor.leftCount);
   const rightCount = useSelector((state) => state.cursor.rightCount);
+  const cursorDisappearCount = useCursorDisappearCount(5, cursor);
 
   useEffect(() => {
     socket.emit("cursorPosition", roomName, socket.id, cursor);
   }, [roomName, cursor]);
 
-  useEffect(() => {
-    const timer = setInterval(() => {
-      if (invisibleCount > 0) {
-        setInvisibleCount((count) => count - 1);
-      }
-    }, 1000);
-    return () => clearInterval(timer);
-  }, [invisibleCount]);
-
-  useEffect(() => {
-    setInvisibleCount(5);
-  }, [cursor]);
-
   return (
     <>
-      {invisibleCount !== 0 && (
+      {cursorDisappearCount !== 0 && (
         <>
           <RightCursor
             left={

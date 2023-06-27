@@ -1,27 +1,13 @@
 import React from "react";
 import styled from "styled-components";
-import { useState, useEffect } from "react";
+import { useCursorDisappearCount } from "../hooks/useCursorDisappearCount";
 
-export default function Cursor({ cursor, canvas }) {
-  const [invisibleCount, setInvisibleCount] = useState(5);
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      if (invisibleCount > 0) {
-        setInvisibleCount((count) => count - 1);
-      }
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, [invisibleCount]);
-
-  useEffect(() => {
-    setInvisibleCount(5);
-  }, [cursor]);
+export default function OtherCursor({ cursor, canvas }) {
+  const cursorDisappearCount = useCursorDisappearCount(5, cursor);
 
   return (
     <>
-      {invisibleCount > 0 && (
+      {cursorDisappearCount > 0 && (
         <RightCursor
           left={
             canvas.current &&

@@ -29,7 +29,6 @@ import { socket } from "./App";
 import { useDispatch, useSelector } from "react-redux";
 import { pushHistory, setHistory } from "../features/history/historySlice";
 import { setLeftCount } from "../features/history/cursorSlice";
-import MyCursor from "./MyCursor";
 import {
   drawStraightLine,
   drawRectangle,
@@ -39,7 +38,8 @@ import {
   setLeftCursorPosition,
   setRightCursorPosition,
 } from "../features/history/cursorSlice";
-import OthersCursor from "./OthersCursor";
+import DisplayMyCursor from "./DisplayMyCursor";
+import DisplayOtherCursors from "./DisplayOtherCursors";
 import ColorCircle from "./ColorCircle";
 
 export default function Room() {
@@ -1208,8 +1208,8 @@ export default function Room() {
 
   return (
     <Wrapper>
-      <MyCursor roomName={roomName} canvas={paperCanvasRef} />
-      <OthersCursor canvas={paperCanvasRef} />
+      <DisplayMyCursor roomName={roomName} canvas={paperCanvasRef} />
+      <DisplayOtherCursors canvas={paperCanvasRef} />
       <ShowModalButton onClick={modalOpenHandler}>?</ShowModalButton>
       {isModalOpen && <Modal modalCloseHandler={modalCloseHandler} />}
       <LeftContainer>

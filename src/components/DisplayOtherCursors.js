@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { useEffect } from "react";
 import { socket } from "./App";
-import Cursor from "./Cursor";
+import OtherCursor from "./OtherCursor";
 
-export default function OthersCursor({ canvas }) {
+export default function DisplayOtherCursors({ canvas }) {
   const [position, setPosition] = useState({});
 
   useEffect(() => {
@@ -20,7 +20,7 @@ export default function OthersCursor({ canvas }) {
     <>
       {Object.values(position).length !== 0 &&
         Object.values(position).map((value, index) => {
-          return <Cursor key={index} cursor={value} canvas={canvas} />;
+          return <OtherCursor key={index} cursor={value} canvas={canvas} />;
         })}
     </>
   );
