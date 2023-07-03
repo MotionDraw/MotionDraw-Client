@@ -3,11 +3,6 @@ import Lobby from "./Lobby";
 import Room from "./Room";
 import { Routes, Route } from "react-router-dom";
 import styled, { createGlobalStyle } from "styled-components";
-import { io } from "socket.io-client";
-
-export const socket = io(process.env.REACT_APP_SOCKET_URL, {
-  maxHttpBufferSize: 10 * 1024 * 1024,
-});
 
 export default function App() {
   return (

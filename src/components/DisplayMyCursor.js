@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useSelector } from "react-redux";
 import styled from "styled-components";
-import { socket } from "./App";
+import { socket } from "../socket";
 import { useCursorDisappearCount } from "../hooks/useCursorDisappearCount";
 
 export default function DisplayMyCursor({ roomName, canvas }) {

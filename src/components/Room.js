@@ -25,7 +25,7 @@ import {
   PAPER_CANVAS_WIDTH_PX,
   THICKNESS,
 } from "../constants/canvasConfig";
-import { socket } from "./App";
+import { socket } from "../socket";
 import { useDispatch, useSelector } from "react-redux";
 import { pushHistory, setHistory } from "../features/history/historySlice";
 import { setLeftCount } from "../features/history/cursorSlice";

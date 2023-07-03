@@ -2,7 +2,7 @@ import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { useState, useEffect } from "react";
-import { socket } from "./App";
+import { socket } from "../socket";
 import { initHistory } from "../features/history/historySlice";
 
 export default function Lobby() {
