@@ -103,7 +103,6 @@ export default function Room() {
     return () => {
       if (!cleanupCalled.current) {
         cleanupCalled.current = true;
-      } else {
         socket.emit("leaveRoom", roomName);
       }
     };
